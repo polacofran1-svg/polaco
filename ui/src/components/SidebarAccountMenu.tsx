@@ -19,6 +19,7 @@ import { useTheme } from "../context/ThemeContext";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "../lib/utils";
+import { APP_NAME } from "@/lib/branding";
 
 const PROFILE_SETTINGS_PATH = "/instance/settings/profile";
 const DOCS_URL = "https://docs.paperclip.ing/";
@@ -64,11 +65,11 @@ function deriveUserSlug(name: string | null | undefined, email: string | null | 
 
 function MenuAction({ label, description, icon: Icon, onClick, href, external = false }: MenuActionProps) {
   const className =
-    "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-accent/60";
+    "flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-accent";
 
   const content = (
     <>
-      <span className="mt-0.5 rounded-lg border border-border bg-background/70 p-2 text-muted-foreground">
+      <span className="mt-0.5 rounded-xl border border-border bg-background p-2 text-muted-foreground">
         <Icon className="size-4" />
       </span>
       <span className="min-w-0 flex-1">
@@ -141,12 +142,12 @@ export function SidebarAccountMenu({
   }
 
   return (
-    <div className="border-t border-r border-border bg-background px-3 py-2">
+    <div className="border-r border-t border-sidebar-border bg-sidebar px-3 py-3">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-medium text-foreground/80 transition-colors hover:bg-accent/50 hover:text-foreground"
+            className="flex w-full items-center gap-2.5 rounded-2xl border border-transparent bg-background px-3 py-2.5 text-left text-[13px] font-semibold text-foreground/80 transition-colors hover:bg-accent hover:text-accent-foreground"
             aria-label="Open account menu"
           >
             <Avatar size="sm">
@@ -160,9 +161,9 @@ export function SidebarAccountMenu({
           side="top"
           align="start"
           sideOffset={10}
-          className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-t-2xl rounded-b-none border-border p-0 shadow-2xl"
+          className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-[1.4rem] border-border bg-popover p-0 shadow-[0_32px_80px_rgba(0,0,0,0.28)]"
         >
-          <div className="h-24 bg-[linear-gradient(135deg,hsl(var(--primary))_0%,hsl(var(--accent))_55%,hsl(var(--muted))_100%)]" />
+          <div className="h-24 bg-[linear-gradient(135deg,#111_0%,#1f2937_52%,#2563eb_100%)]" />
           <div className="-mt-8 px-4 pb-4">
             <div className="flex items-start gap-3">
               <div className="rounded-2xl border-4 border-popover bg-popover p-0.5 shadow-sm">
@@ -174,13 +175,13 @@ export function SidebarAccountMenu({
               <div className="min-w-0 flex-1 pt-1">
                 <div className="flex items-center gap-2">
                   <h2 className="truncate text-base font-semibold text-foreground">{displayName}</h2>
-                  <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <span className="rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.18em] text-accent-foreground">
                     {accountBadge}
                   </span>
                 </div>
                 <p className="truncate text-sm text-muted-foreground">{secondaryLabel}</p>
                 {version ? (
-                  <p className="mt-1 text-xs text-muted-foreground">Paperclip v{version}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{APP_NAME} v{version}</p>
                 ) : null}
               </div>
             </div>
@@ -209,7 +210,7 @@ export function SidebarAccountMenu({
               />
               <MenuAction
                 label="Documentation"
-                description="Open Paperclip docs in a new tab."
+                description={`Open ${APP_NAME} docs in a new tab.`}
                 icon={BookOpen}
                 href={DOCS_URL}
                 external
@@ -228,13 +229,13 @@ export function SidebarAccountMenu({
                 <button
                   type="button"
                   className={cn(
-                    "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-destructive/10",
+                    "flex w-full items-start gap-3 rounded-2xl px-3 py-3 text-left transition-colors hover:bg-destructive/10",
                     signOutMutation.isPending && "cursor-not-allowed opacity-60",
                   )}
                   onClick={() => signOutMutation.mutate()}
                   disabled={signOutMutation.isPending}
                 >
-                  <span className="mt-0.5 rounded-lg border border-border bg-background/70 p-2 text-muted-foreground">
+                  <span className="mt-0.5 rounded-xl border border-border bg-background p-2 text-muted-foreground">
                     <LogOut className="size-4" />
                   </span>
                   <span className="min-w-0 flex-1">

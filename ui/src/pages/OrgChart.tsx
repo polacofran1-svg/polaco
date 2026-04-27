@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "../components/EmptyState";
 import { PageSkeleton } from "../components/PageSkeleton";
 import { AgentIcon } from "../components/AgentIconPicker";
-import { Download, Maximize2, Minus, Network, Plus, Upload } from "lucide-react";
+import { Download, Maximize2, Minus, Network, Plus, Search, Upload, Users, CheckCircle2, PauseCircle, XCircle, X } from "lucide-react";
 import { AGENT_ROLE_LABELS, type Agent } from "@paperclipai/shared";
 
 // Layout constants
@@ -218,6 +218,7 @@ export function OrgChart() {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [dragging, setDragging] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const touchGesture = useRef<TouchGesture>({
     mode: null,
@@ -263,6 +264,39 @@ export function OrgChart() {
       y: (containerH - chartH) / 2,
     });
   }, [allNodes, bounds]);
+
+  // Stats
+  const stats = useMemo(() => {
+    const active = allNodes.filter((n) => n.status === "active" || n.status === "running").length;
+    const paused = allNodes.filter((n) => n.status === "paused" || n.status === "idle").length;
+    const other = allNodes.length - active - paused;
+    return { total: allNodes.length, active, paused, other };
+  }, [allNodes]);
+
+  // Nodes that match the search
+  const matchedNodeIds = useMemo(() => {
+    if (!searchQuery.trim()) return new Set<string>();
+    const q = searchQuery.toLowerCase();
+    const ids = new Set<string>();
+    for (const n of allNodes) {
+      if (n.name.toLowerCase().includes(q) || n.role.toLowerCase().includes(q)) {
+        ids.add(n.id);
+      }
+    }
+    return ids;
+  }, [allNodes, searchQuery]);
+
+  // Pan to first match when search changes
+  useEffect(() => {
+    if (!searchQuery.trim() || matchedNodeIds.size === 0 || !containerRef.current) return;
+    const firstId = [...matchedNodeIds][0]!;
+    const node = allNodes.find((n) => n.id === firstId);
+    if (!node) return;
+    const container = containerRef.current;
+    const targetX = container.clientWidth / 2 - (node.x + CARD_W / 2) * zoom;
+    const targetY = container.clientHeight / 2 - (node.y + CARD_H / 2) * zoom;
+    setPan({ x: targetX, y: targetY });
+  }, [matchedNodeIds, searchQuery]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -441,18 +475,88 @@ export function OrgChart() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-9rem)] min-h-[420px] flex-col md:h-full md:min-h-0">
-      <div className="mb-2 flex shrink-0 flex-wrap items-center justify-start gap-2">
+    <div className="flex h-[calc(100dvh-9rem)] min-h-[420px] flex-col gap-3 md:h-full md:min-h-0">
+
+      {/* Stats row */}
+      {stats.total > 0 && (
+        <div className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card px-3 py-2.5 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Users className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="text-lg font-bold leading-none">{stats.total}</div>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">Total</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card px-3 py-2.5 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="text-lg font-bold leading-none">{stats.active}</div>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">Active</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card px-3 py-2.5 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-500/10 text-yellow-600 dark:text-yellow-400">
+              <PauseCircle className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="text-lg font-bold leading-none">{stats.paused}</div>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">Paused</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card px-3 py-2.5 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+              <XCircle className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <div className="text-lg font-bold leading-none">{stats.other}</div>
+              <div className="mt-0.5 text-[11px] text-muted-foreground">Other</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toolbar: search + import/export */}
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[160px]">
+          <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input
+            className="h-8 w-full rounded-lg border border-border bg-background pl-8 pr-7 text-sm outline-none placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring transition-shadow"
+            placeholder={`Search ${stats.total} agents…`}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        {searchQuery && matchedNodeIds.size > 0 && (
+          <span className="text-xs text-muted-foreground shrink-0">
+            {matchedNodeIds.size} match{matchedNodeIds.size !== 1 ? "es" : ""}
+          </span>
+        )}
+        {searchQuery && matchedNodeIds.size === 0 && (
+          <span className="text-xs text-destructive shrink-0">No matches</span>
+        )}
         <Link to="/company/import">
           <Button variant="outline" size="sm">
             <Upload className="mr-1.5 h-3.5 w-3.5" />
-            Import company
+            Import
           </Button>
         </Link>
         <Link to="/company/export">
           <Button variant="outline" size="sm">
             <Download className="mr-1.5 h-3.5 w-3.5" />
-            Export company
+            Export
           </Button>
         </Link>
       </div>
@@ -560,17 +664,28 @@ export function OrgChart() {
           {allNodes.map((node) => {
             const agent = agentMap.get(node.id);
             const dotColor = statusDotColor[node.status] ?? defaultDotColor;
+            const isSearchActive = searchQuery.trim().length > 0;
+            const isMatch = matchedNodeIds.has(node.id);
+            const isDimmed = isSearchActive && !isMatch;
 
             return (
               <div
                 key={node.id}
                 data-org-card
-                className="absolute bg-card border border-border rounded-lg shadow-sm hover:shadow-md hover:border-foreground/20 transition-[box-shadow,border-color] duration-150 cursor-pointer select-none"
+                className="absolute rounded-lg shadow-sm cursor-pointer select-none transition-all duration-150"
                 style={{
                   left: node.x,
                   top: node.y,
                   width: CARD_W,
                   minHeight: CARD_H,
+                  opacity: isDimmed ? 0.25 : 1,
+                  background: isMatch ? "var(--color-primary)" : "var(--color-card)",
+                  border: isMatch
+                    ? "2px solid var(--color-primary)"
+                    : "1px solid var(--border)",
+                  boxShadow: isMatch
+                    ? "0 0 0 3px color-mix(in srgb, var(--color-primary) 30%, transparent)"
+                    : undefined,
                 }}
                 onClick={() => navigate(agent ? agentUrl(agent) : `/agents/${node.id}`)}
                 onClickCapture={(e) => {
@@ -593,19 +708,19 @@ export function OrgChart() {
                   </div>
                   {/* Name + role + adapter type */}
                   <div className="flex flex-col items-start min-w-0 flex-1">
-                    <span className="text-sm font-semibold text-foreground leading-tight">
+                    <span className={`text-sm font-semibold leading-tight ${isMatch ? "text-primary-foreground" : "text-foreground"}`}>
                       {node.name}
                     </span>
-                    <span className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                    <span className={`text-[11px] leading-tight mt-0.5 ${isMatch ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
                       {agent?.title ?? roleLabel(node.role)}
                     </span>
                     {agent && (
-                      <span className="text-[10px] text-muted-foreground/60 font-mono leading-tight mt-1">
+                      <span className={`text-[10px] font-mono leading-tight mt-1 ${isMatch ? "text-primary-foreground/60" : "text-muted-foreground/60"}`}>
                         {getAdapterLabel(agent.adapterType)}
                       </span>
                     )}
                     {agent && agent.capabilities && (
-                      <span className="text-[10px] text-muted-foreground/80 leading-tight mt-1 line-clamp-2">
+                      <span className={`text-[10px] leading-tight mt-1 line-clamp-2 ${isMatch ? "text-primary-foreground/80" : "text-muted-foreground/80"}`}>
                         {agent.capabilities}
                       </span>
                     )}

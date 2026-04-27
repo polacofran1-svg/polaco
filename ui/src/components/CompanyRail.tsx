@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { Paperclip, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import {
   DndContext,
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { Company } from "@paperclipai/shared";
 import { CompanyPatternIcon } from "./CompanyPatternIcon";
+import { SaturnLogo } from "./SaturnLogo";
 
 function SortableCompanyItem({
   company,
@@ -199,14 +200,16 @@ export function CompanyRail() {
   );
 
   return (
-    <div className="flex flex-col items-center w-[72px] shrink-0 h-full bg-background border-r border-border">
-      {/* Paperclip icon - aligned with top sections (implied line, no visible border) */}
-      <div className="flex items-center justify-center h-12 w-full shrink-0">
-        <Paperclip className="h-5 w-5 text-foreground" />
+    <div className="saturn-surface flex h-full w-[76px] shrink-0 flex-col items-center rounded-none border-r border-sidebar-border bg-sidebar">
+      {/* Primary app icon */}
+      <div className="flex h-14 w-full shrink-0 items-center justify-center">
+        <div className="saturn-halo relative flex h-10 w-10 items-center justify-center rounded-[1.2rem] bg-primary text-primary-foreground shadow-[0_8px_18px_rgba(0,0,0,0.12)]">
+          <SaturnLogo className="h-5 w-5 text-current" />
+        </div>
       </div>
 
       {/* Company list */}
-      <div className="flex-1 flex flex-col items-center gap-2 py-3 w-full overflow-y-auto overflow-x-hidden scrollbar-none">
+      <div className="flex w-full flex-1 flex-col items-center gap-2 overflow-y-auto overflow-x-hidden py-3 scrollbar-none">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -236,15 +239,15 @@ export function CompanyRail() {
       </div>
 
       {/* Separator before add button */}
-      <div className="w-8 h-px bg-border mx-auto shrink-0" />
+      <div className="mx-auto h-px w-9 shrink-0 bg-border" />
 
       {/* Add company button */}
-      <div className="flex items-center justify-center py-2 shrink-0">
+      <div className="flex shrink-0 items-center justify-center py-3">
         <Tooltip delayDuration={300}>
           <TooltipTrigger asChild>
             <button
               onClick={() => openOnboarding()}
-              className="flex items-center justify-center w-11 h-11 rounded-[22px] hover:rounded-[14px] border-2 border-dashed border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-[border-color,color,border-radius] duration-150"
+              className="flex h-11 w-11 items-center justify-center rounded-[1.2rem] border border-dashed border-sidebar-border bg-background text-muted-foreground transition-[border-color,color,transform,background-color] duration-150 hover:-translate-y-0.5 hover:border-accent hover:bg-secondary hover:text-foreground"
               aria-label="Add company"
             >
               <Plus className="h-5 w-5" />

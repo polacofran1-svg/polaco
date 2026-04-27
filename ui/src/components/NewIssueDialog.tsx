@@ -11,6 +11,7 @@ import { agentsApi } from "../api/agents";
 import { accessApi } from "../api/access";
 import { authApi } from "../api/auth";
 import { assetsApi } from "../api/assets";
+import { issueTemplatesApi } from "../api/issue-templates";
 import { buildCompanyUserInlineOptions, buildMarkdownMentionOptions } from "../lib/company-members";
 import { queryKeys } from "../lib/queryKeys";
 import { useProjectOrder } from "../hooks/useProjectOrder";
@@ -54,6 +55,11 @@ import {
   X,
   Eye,
   ShieldCheck,
+  Bug,
+  Search,
+  FlaskConical,
+  RefreshCw,
+  LayoutTemplate,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { extractProviderIdWithFallback } from "../lib/model-utils";
@@ -61,6 +67,7 @@ import { issueStatusText, issueStatusTextDefault, priorityColor, priorityColorDe
 import { MarkdownEditor, type MarkdownEditorRef, type MentionOption } from "./MarkdownEditor";
 import { AgentIcon } from "./AgentIconPicker";
 import { InlineEntitySelector, type InlineEntityOption } from "./InlineEntitySelector";
+import { useI18n } from "@/context/I18nContext";
 
 const DRAFT_KEY = "paperclip:issue-draft";
 const DEBOUNCE_MS = 800;
@@ -95,6 +102,7 @@ type StagedIssueFile = {
 
 const ISSUE_OVERRIDE_ADAPTER_TYPES = new Set(["claude_local", "codex_local", "opencode_local"]);
 const STAGED_FILE_ACCEPT = "image/*,application/pdf,text/plain,text/markdown,application/json,text/csv,text/html,.md,.markdown";
+
 
 const ISSUE_THINKING_EFFORT_OPTIONS = {
   claude_local: [
@@ -308,6 +316,7 @@ export function NewIssueDialog() {
   const [isFileDragOver, setIsFileDragOver] = useState(false);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const executionWorkspaceDefaultProjectId = useRef<string | null>(null);
+  const { t } = useI18n();
 
   const effectiveCompanyId = dialogCompanyId ?? selectedCompanyId;
   const dialogCompany = companies.find((c) => c.id === effectiveCompanyId) ?? selectedCompany;
@@ -366,6 +375,11 @@ export function NewIssueDialog() {
     queryFn: () => instanceSettingsApi.getExperimental(),
     enabled: newIssueOpen,
     retry: false,
+  });
+  const { data: issueTemplates } = useQuery({
+    queryKey: queryKeys.issueTemplates.list(effectiveCompanyId!),
+    queryFn: () => issueTemplatesApi.list(effectiveCompanyId!),
+    enabled: Boolean(effectiveCompanyId) && newIssueOpen,
   });
   const currentUserId = session?.user?.id ?? session?.session?.userId ?? null;
   const activeProjects = useMemo(
@@ -973,12 +987,12 @@ export function NewIssueDialog() {
       >
         {/* Header bar */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border shrink-0">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
             <Popover open={companyOpen} onOpenChange={setCompanyOpen}>
               <PopoverTrigger asChild>
                 <button
                   className={cn(
-                    "px-1.5 py-0.5 rounded text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity",
+                    "px-1.5 py-0.5 rounded text-xs font-semibold cursor-pointer hover:opacity-80 transition-opacity shrink-0",
                     !dialogCompany?.brandColor && "bg-muted",
                   )}
                   disabled={isSubIssueMode}
@@ -1009,7 +1023,7 @@ export function NewIssueDialog() {
                   >
                     <span
                       className={cn(
-                        "px-1 py-0.5 rounded text-[10px] font-semibold leading-none",
+                        "px-1 py-0.5 rounded text-[10px] font-semibold leading-none shrink-0",
                         !c.brandColor && "bg-muted",
                       )}
                       style={
@@ -1028,37 +1042,65 @@ export function NewIssueDialog() {
                 ))}
               </PopoverContent>
             </Popover>
-            <span className="text-muted-foreground/60">&rsaquo;</span>
-            <span>{isSubIssueMode ? "New sub-issue" : "New issue"}</span>
+            <span className="text-muted-foreground/60 shrink-0">&rsaquo;</span>
+            <span className="truncate">{isSubIssueMode ? t("modals.newIssue.subIssueTitle") : t("modals.newIssue.title")}</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="icon-xs"
+              size="icon-sm"
               className="text-muted-foreground"
               onClick={() => setExpanded(!expanded)}
               disabled={createIssue.isPending}
             >
-              {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </Button>
             <Button
               variant="ghost"
-              size="icon-xs"
+              size="icon-sm"
               className="text-muted-foreground"
               onClick={() => closeNewIssue()}
               disabled={createIssue.isPending}
             >
-              <span className="text-lg leading-none">&times;</span>
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {/* Quick Templates */}
+          {!title && !description && issueTemplates && issueTemplates.length > 0 && (
+            <div className="px-4 pt-4 pb-1">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-3">{t("modals.newIssue.quickTemplates")}</div>
+              <div className="flex gap-2 overflow-x-auto hide-scrollbar pb-2">
+                {issueTemplates.map((t) => {
+                  const Icon = LayoutTemplate;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border/70 bg-secondary/50 px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-foreground"
+                      title={t.description ?? undefined}
+                      onClick={() => {
+                        setTitle(t.issueTitle ?? "");
+                        setDescription(t.issueDescription);
+                        setTimeout(() => descriptionEditorRef.current?.focus(), 50);
+                      }}
+                    >
+                      <Icon className="h-4 w-4 text-muted-foreground" />
+                      {t.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Title */}
-          <div className="px-4 pt-4 pb-2">
+          <div className="px-4 pt-3 pb-2">
             <textarea
             className="w-full text-lg font-semibold bg-transparent outline-none resize-none overflow-hidden placeholder:text-muted-foreground/50"
-            placeholder="Issue title"
+            placeholder={t("modals.newIssue.issueTitlePlaceholder")}
             rows={1}
             value={title}
             onChange={(e) => {
@@ -1098,17 +1140,17 @@ export function NewIssueDialog() {
           <div className="px-4 pb-2">
             <div className="overflow-x-auto overscroll-x-contain">
               <div className="inline-flex items-center gap-2 text-sm text-muted-foreground flex-wrap sm:flex-nowrap sm:min-w-max">
-              <span className="w-6 shrink-0 text-center">For</span>
+              <span className="w-6 shrink-0 text-center">{t("modals.newIssue.for")}</span>
               <InlineEntitySelector
                 ref={assigneeSelectorRef}
                 value={assigneeValue}
                 options={assigneeOptions}
                 recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Assignee"
+                placeholder={t("modals.newIssue.assignee")}
                 disablePortal
-                noneLabel="No assignee"
-                searchPlaceholder="Search assignees..."
-                emptyMessage="No assignees found."
+                noneLabel={t("modals.newIssue.noAssignee")}
+                searchPlaceholder={t("modals.newIssue.searchAssignees")}
+                emptyMessage={t("modals.newIssue.noAssigneesFound")}
                 onChange={(value) => {
                   const nextAssignee = parseAssigneeValue(value);
                   if (nextAssignee.assigneeAgentId) {
@@ -1134,7 +1176,7 @@ export function NewIssueDialog() {
                       <span className="truncate">{option.label}</span>
                     )
                   ) : (
-                    <span className="text-muted-foreground">Assignee</span>
+                    <span className="text-muted-foreground">{t("modals.newIssue.assignee")}</span>
                   )
                 }
                 renderOption={(option) => {
@@ -1150,17 +1192,17 @@ export function NewIssueDialog() {
                   );
                 }}
               />
-              <span>in</span>
+              <span>{t("modals.newIssue.in")}</span>
               <InlineEntitySelector
                 ref={projectSelectorRef}
                 value={projectId}
                 options={projectOptions}
                 recentOptionIds={recentProjectIds}
-                placeholder="Project"
+                placeholder={t("modals.newIssue.project")}
                 disablePortal
-                noneLabel="No project"
-                searchPlaceholder="Search projects..."
-                emptyMessage="No projects found."
+                noneLabel={t("modals.newIssue.noProject")}
+                searchPlaceholder={t("modals.newIssue.searchProjects")}
+                emptyMessage={t("modals.newIssue.noProjectsFound")}
                 onChange={handleProjectChange}
                 onConfirm={() => {
                   descriptionEditorRef.current?.focus();
@@ -1175,7 +1217,7 @@ export function NewIssueDialog() {
                       <span className="truncate">{option.label}</span>
                     </>
                   ) : (
-                    <span className="text-muted-foreground">Project</span>
+                    <span className="text-muted-foreground">{t("modals.newIssue.project")}</span>
                   )
                 }
                 renderOption={(option) => {
@@ -1217,7 +1259,7 @@ export function NewIssueDialog() {
                     }}
                   >
                     <Eye className="h-3 w-3" />
-                    Reviewer
+                    {t("modals.newIssue.reviewer")}
                   </button>
                   <button
                     className={cn(
@@ -1231,7 +1273,7 @@ export function NewIssueDialog() {
                     }}
                   >
                     <ShieldCheck className="h-3 w-3" />
-                    Approver
+                    {t("modals.newIssue.approver")}
                   </button>
                 </PopoverContent>
               </Popover>
@@ -1246,11 +1288,11 @@ export function NewIssueDialog() {
                 value={reviewerValue}
                 options={assigneeOptions}
                 recentOptionIds={recentAssigneeOptionIds}
-                placeholder="Reviewer"
+                placeholder={t("modals.newIssue.reviewer")}
                 disablePortal
-                noneLabel="No reviewer"
-                searchPlaceholder="Search reviewers..."
-                emptyMessage="No reviewers found."
+                noneLabel={t("modals.newIssue.noAssignee")}
+                searchPlaceholder={t("modals.newIssue.searchAssignees")}
+                emptyMessage={t("modals.newIssue.noAssigneesFound")}
                 onChange={setReviewerValue}
                 renderTriggerValue={(option) =>
                   option ? (
@@ -1334,7 +1376,7 @@ export function NewIssueDialog() {
             <div className="max-w-full rounded-md border border-border bg-muted/30 px-2.5 py-1.5 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <ListTree className="h-3.5 w-3.5 shrink-0" />
-                <span className="shrink-0">Sub-issue of</span>
+                <span className="shrink-0">{t("modals.newIssue.subIssueOf")}</span>
                 <span className="font-medium text-foreground">{parentIssueLabel}</span>
               </div>
               {newIssueDefaults.parentTitle ? (
@@ -1349,9 +1391,9 @@ export function NewIssueDialog() {
           {currentProject && currentProjectSupportsExecutionWorkspace && (
             <div className="px-4 py-3 space-y-2">
             <div className="space-y-1.5">
-              <div className="text-xs font-medium">Execution workspace</div>
+              <div className="text-xs font-medium">{t("modals.newIssue.executionWorkspace")}</div>
               <div className="text-[11px] text-muted-foreground">
-                Control whether this issue runs in the shared workspace, a new isolated workspace, or an existing one.
+                {t("modals.newIssue.executionWorkspaceDesc")}
               </div>
               <select
                 className="w-full rounded border border-border bg-transparent px-2 py-1.5 text-xs outline-none"
@@ -1666,14 +1708,14 @@ export function NewIssueDialog() {
             onClick={discardDraft}
             disabled={createIssue.isPending || !canDiscardDraft}
           >
-            Discard Draft
+            {t("modals.newIssue.discardDraft")}
           </Button>
           <div className="flex items-center gap-3">
             <div className="min-h-5 text-right">
               {createIssue.isPending ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" />
-                  Creating issue...
+                  {t("modals.newIssue.creatingIssue")}
                 </span>
               ) : createIssue.isError ? (
                 <span className="text-xs text-destructive">{createIssueErrorMessage}</span>
@@ -1688,7 +1730,7 @@ export function NewIssueDialog() {
             >
               <span className="inline-flex items-center justify-center gap-1.5">
                 {createIssue.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
-                <span>{createIssue.isPending ? "Creating..." : isSubIssueMode ? "Create Sub-Issue" : "Create Issue"}</span>
+                <span>{createIssue.isPending ? t("modals.newIssue.creating") : isSubIssueMode ? t("modals.newIssue.createSubIssue") : t("modals.newIssue.createIssue")}</span>
               </span>
             </Button>
           </div>

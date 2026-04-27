@@ -47,7 +47,7 @@ export function BreadcrumbBar() {
 
   if (isMobile && mobileToolbar) {
     return (
-      <div className="border-b border-border px-2 h-12 shrink-0 flex items-center">
+      <div className="flex h-14 shrink-0 items-center border-b border-border bg-background px-2">
         {mobileToolbar}
       </div>
     );
@@ -55,7 +55,7 @@ export function BreadcrumbBar() {
 
   if (breadcrumbs.length === 0) {
     return (
-      <div className="border-b border-border px-4 md:px-6 h-12 shrink-0 flex items-center justify-end">
+      <div className="flex h-14 shrink-0 items-center justify-end border-b border-border bg-background px-4 md:px-6">
         {globalToolbarSlots}
       </div>
     );
@@ -65,7 +65,7 @@ export function BreadcrumbBar() {
     <Button
       variant="ghost"
       size="icon-sm"
-      className="mr-2 shrink-0"
+      className="mr-2 shrink-0 rounded-lg"
       onClick={toggleSidebar}
       aria-label="Open sidebar"
     >
@@ -76,10 +76,10 @@ export function BreadcrumbBar() {
   // Single breadcrumb = page title (uppercase)
   if (breadcrumbs.length === 1) {
     return (
-      <div className="border-b border-border px-4 md:px-6 h-12 shrink-0 flex items-center">
+      <div className="flex h-14 shrink-0 items-center border-b border-border bg-background px-4 md:px-6">
         {menuButton}
         <div className="min-w-0 overflow-hidden flex-1">
-          <h1 className="text-sm font-semibold uppercase tracking-wider truncate">
+          <h1 className="truncate text-[0.8rem] font-semibold uppercase tracking-[0.22em] text-foreground">
             {breadcrumbs[0].label}
           </h1>
         </div>
@@ -90,7 +90,7 @@ export function BreadcrumbBar() {
 
   // Multiple breadcrumbs = breadcrumb trail
   return (
-    <div className="border-b border-border px-4 md:px-6 h-12 shrink-0 flex items-center">
+    <div className="flex h-14 shrink-0 items-center border-b border-border bg-background px-4 md:px-6">
       {menuButton}
       <div className="min-w-0 overflow-hidden flex-1">
         <Breadcrumb className="min-w-0 overflow-hidden">

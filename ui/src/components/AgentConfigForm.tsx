@@ -291,8 +291,7 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
     enabled: Boolean(selectedCompanyId),
   });
   const models = fetchedModels ?? externalModels ?? [];
-  const adapterCommandField =
-    adapterType === "hermes_local" ? "hermesCommand" : "command";
+  const adapterCommandField = "command";
   const {
     data: detectedModelData,
     refetch: refetchDetectedModel,
@@ -349,17 +348,6 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
     }
     const base = config as Record<string, unknown>;
     const next = { ...base, ...overlay.adapterConfig };
-    if (adapterType === "hermes_local") {
-      const hermesCommand =
-        typeof next.hermesCommand === "string" && next.hermesCommand.length > 0
-          ? next.hermesCommand
-          : typeof next.command === "string" && next.command.length > 0
-            ? next.command
-            : undefined;
-      if (hermesCommand) {
-        next.hermesCommand = hermesCommand;
-      }
-    }
     return next;
   }
 
@@ -684,11 +672,7 @@ export function AgentConfigForm(props: AgentConfigFormProps) {
                       : eff(
                           "adapterConfig",
                           adapterCommandField,
-                          String(
-                            (adapterType === "hermes_local"
-                              ? config.hermesCommand ?? config.command
-                              : config.command) ?? "",
-                          ),
+                          String(config.command ?? ""),
                         )
                   }
                   onCommit={(v) =>

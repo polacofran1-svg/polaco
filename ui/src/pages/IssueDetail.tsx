@@ -81,6 +81,7 @@ import { PluginLauncherOutlet } from "@/plugins/launchers";
 import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -89,6 +90,11 @@ import { formatIssueActivityAction } from "@/lib/activity-format";
 import { buildIssuePropertiesPanelKey } from "../lib/issue-properties-panel-key";
 import { shouldRenderRichSubIssuesSection } from "../lib/issue-detail-subissues";
 import { buildSubIssueDefaultsForViewer } from "../lib/subIssueDefaults";
+import {
+  contentIssueKindLabel,
+  contentIssueStageLabel,
+  isContentIssue,
+} from "../lib/content-issues";
 import {
   Activity as ActivityIcon,
   Archive,
@@ -2325,6 +2331,15 @@ export function IssueDetail() {
             onChange={(priority) => updateIssue.mutate({ priority })}
           />
           <span className="text-sm font-mono text-muted-foreground shrink-0">{issue.identifier ?? issue.id.slice(0, 8)}</span>
+          {isContentIssue(issue) ? (
+            <>
+              <Badge variant="outline" className="border-blue-500/20 bg-blue-500/8 text-blue-700 dark:text-blue-300">
+                Content
+              </Badge>
+              <Badge variant="secondary">{contentIssueKindLabel(issue)}</Badge>
+              <Badge variant="outline">{contentIssueStageLabel(issue.status)}</Badge>
+            </>
+          ) : null}
 
           {hasLiveRuns && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 text-[10px] font-medium text-cyan-600 dark:text-cyan-400 shrink-0">
@@ -2468,14 +2483,14 @@ export function IssueDetail() {
           value={issue.title}
           onSave={(title) => updateIssue.mutateAsync({ title })}
           as="h2"
-          className="text-xl font-bold"
+          className="text-2xl font-semibold tracking-[-0.04em] sm:text-3xl"
         />
 
         <InlineEditor
           value={issue.description ?? ""}
           onSave={(description) => updateIssue.mutateAsync({ description })}
           as="p"
-          className="text-[15px] leading-7 text-foreground"
+          className="text-[15px] leading-7 text-muted-foreground"
           placeholder="Add a description..."
           multiline
           mentions={mentionOptions}
@@ -2730,8 +2745,8 @@ export function IssueDetail() {
 
       <Separator />
 
-      <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-3">
-        <TabsList variant="line" className="w-full justify-start gap-1">
+      <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-4">
+        <TabsList variant="line" className="w-full justify-start gap-1 rounded-2xl border border-border bg-card p-1">
           <TabsTrigger value="chat" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" />
             Chat

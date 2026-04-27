@@ -32,9 +32,16 @@ import { IssueReferencePill } from "./IssueReferencePill";
 import { formatDate, cn, projectUrl } from "../lib/utils";
 import { timeAgo } from "../lib/timeAgo";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { User, Hexagon, ArrowUpRight, Tag, Plus, GitBranch, FolderOpen, Check, ExternalLink } from "lucide-react";
 import { AgentIcon } from "./AgentIconPicker";
+import {
+  contentIssueKindLabel,
+  contentIssueStageDescription,
+  contentIssueStageLabel,
+  isContentIssue,
+} from "../lib/content-issues";
 
 function TruncatedCopyable({ value, icon: Icon }: { value: string; icon: React.ComponentType<{ className?: string }> }) {
   const [copied, setCopied] = useState(false);
@@ -128,8 +135,8 @@ interface IssuePropertiesProps {
 
 function PropertyRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 py-1.5">
-      <span className="text-xs text-muted-foreground shrink-0 w-20 mt-0.5">{label}</span>
+    <div className="flex items-start gap-3 py-2">
+      <span className="mt-1 w-20 shrink-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{label}</span>
       <div className="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">{children}</div>
     </div>
   );
@@ -1054,11 +1061,22 @@ export function IssueProperties({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <PropertyRow label="Status">
-          <StatusIcon
-            status={issue.status}
+    <div className="rounded-[1.75rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] space-y-4">
+        <div className="space-y-1">
+          {isContentIssue(issue) ? (
+            <PropertyRow label="Editorial">
+              <Badge variant="outline" className="border-blue-500/20 bg-blue-500/8 text-blue-700 dark:text-blue-300">
+                {contentIssueKindLabel(issue)}
+              </Badge>
+              <Badge variant="secondary">{contentIssueStageLabel(issue.status)}</Badge>
+              <span className="text-sm text-muted-foreground">
+                {contentIssueStageDescription(issue.status)}
+              </span>
+            </PropertyRow>
+          ) : null}
+          <PropertyRow label="Status">
+            <StatusIcon
+              status={issue.status}
             onChange={(status) => onUpdate({ status })}
             showLabel
           />

@@ -246,373 +246,412 @@ export function CompanySettings() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
-      <div className="flex items-center gap-2">
-        <Settings className="h-5 w-5 text-muted-foreground" />
-        <h1 className="text-lg font-semibold">Company Settings</h1>
+    <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center gap-3 border-b border-border/40 pb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20">
+          <Settings className="h-5 w-5" />
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight">Company Settings</h1>
       </div>
 
-      {/* General */}
-      <div className="space-y-4">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          General
-        </div>
-        <div className="space-y-3 rounded-md border border-border px-4 py-4">
-          <Field label="Company name" hint="The display name for your company.">
-            <input
-              className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none"
-              type="text"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-            />
-          </Field>
-          <Field
-            label="Description"
-            hint="Optional description shown in the company profile."
-          >
-            <input
-              className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none"
-              type="text"
-              value={description}
-              placeholder="Optional company description"
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </Field>
-        </div>
-      </div>
-
-      {/* Appearance */}
-      <div className="space-y-4">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Appearance
-        </div>
-        <div className="space-y-3 rounded-md border border-border px-4 py-4">
-          <div className="flex items-start gap-4">
-            <div className="shrink-0">
-              <CompanyPatternIcon
-                companyName={companyName || selectedCompany.name}
-                logoUrl={logoUrl || null}
-                brandColor={brandColor || null}
-                className="rounded-[14px]"
+      <div className="grid gap-12">
+        {/* General */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">General</h3>
+            <p className="text-sm text-muted-foreground">
+              Manage your company's identity and basic information.
+            </p>
+          </div>
+          <div className="md:col-span-2 space-y-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+            <Field label="Company name" hint="The display name for your company.">
+              <input
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none transition-colors focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
               />
-            </div>
-            <div className="flex-1 space-y-3">
-              <Field
-                label="Logo"
-                hint="Upload a PNG, JPEG, WEBP, GIF, or SVG logo image."
-              >
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
-                    onChange={handleLogoFileChange}
-                    className="w-full rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm outline-none file:mr-4 file:rounded-md file:border-0 file:bg-muted file:px-2.5 file:py-1 file:text-xs"
+            </Field>
+            <Field label="Description" hint="Optional description shown in the company profile.">
+              <input
+                className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none transition-colors focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+                type="text"
+                value={description}
+                placeholder="Optional company description"
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </Field>
+          </div>
+        </div>
+
+        <div className="h-px w-full bg-border/40" />
+
+        {/* Appearance */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">Appearance</h3>
+            <p className="text-sm text-muted-foreground">
+              Customize how your company looks across the platform.
+            </p>
+          </div>
+          <div className="md:col-span-2 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+            <div className="flex flex-col sm:flex-row items-start gap-6">
+              <div className="shrink-0 flex flex-col items-center gap-3">
+                <div className="relative group overflow-hidden rounded-2xl ring-1 ring-border/50 shadow-sm transition-transform duration-300 hover:scale-105">
+                  <CompanyPatternIcon
+                    companyName={companyName || selectedCompany.name}
+                    logoUrl={logoUrl || null}
+                    brandColor={brandColor || null}
+                    className="w-24 h-24"
                   />
                   {logoUrl && (
-                    <div className="flex items-center gap-2">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                       <Button
                         size="sm"
-                        variant="outline"
+                        variant="destructive"
+                        className="h-7 text-[10px] px-2 shadow-lg"
                         onClick={handleClearLogo}
                         disabled={clearLogoMutation.isPending}
                       >
-                        {clearLogoMutation.isPending ? "Removing..." : "Remove logo"}
+                        {clearLogoMutation.isPending ? "Removing..." : "Remove"}
                       </Button>
                     </div>
                   )}
-                  {(logoUploadMutation.isError || logoUploadError) && (
-                    <span className="text-xs text-destructive">
-                      {logoUploadError ??
-                        (logoUploadMutation.error instanceof Error
-                          ? logoUploadMutation.error.message
-                          : "Logo upload failed")}
-                    </span>
-                  )}
-                  {clearLogoMutation.isError && (
-                    <span className="text-xs text-destructive">
-                      {clearLogoMutation.error.message}
-                    </span>
-                  )}
-                  {logoUploadMutation.isPending && (
-                    <span className="text-xs text-muted-foreground">Uploading logo...</span>
-                  )}
                 </div>
-              </Field>
-              <Field
-                label="Brand color"
-                hint="Sets the hue for the company icon. Leave empty for auto-generated color."
-              >
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={brandColor || "#6366f1"}
-                    onChange={(e) => setBrandColor(e.target.value)}
-                    className="h-8 w-8 cursor-pointer rounded border border-border bg-transparent p-0"
-                  />
-                  <input
-                    type="text"
-                    value={brandColor}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) {
-                        setBrandColor(v);
-                      }
-                    }}
-                    placeholder="Auto"
-                    className="w-28 rounded-md border border-border bg-transparent px-2.5 py-1.5 text-sm font-mono outline-none"
-                  />
-                  {brandColor && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => setBrandColor("")}
-                      className="text-xs text-muted-foreground"
-                    >
-                      Clear
-                    </Button>
-                  )}
-                </div>
-              </Field>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Save button for General + Appearance */}
-      {generalDirty && (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={handleSaveGeneral}
-            disabled={generalMutation.isPending || !companyName.trim()}
-          >
-            {generalMutation.isPending ? "Saving..." : "Save changes"}
-          </Button>
-          {generalMutation.isSuccess && (
-            <span className="text-xs text-muted-foreground">Saved</span>
-          )}
-          {generalMutation.isError && (
-            <span className="text-xs text-destructive">
-              {generalMutation.error instanceof Error
-                  ? generalMutation.error.message
-                  : "Failed to save"}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Hiring */}
-      <div className="space-y-4" data-testid="company-settings-team-section">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Hiring
-        </div>
-        <div className="rounded-md border border-border px-4 py-3">
-          <ToggleField
-            label="Require board approval for new hires"
-            hint="New agent hires stay pending until approved by board."
-            checked={!!selectedCompany.requireBoardApprovalForNewAgents}
-            onChange={(v) => settingsMutation.mutate(v)}
-            toggleTestId="company-settings-team-approval-toggle"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Feedback Sharing
-        </div>
-        <div className="space-y-3 rounded-md border border-border px-4 py-4">
-          <ToggleField
-            label="Allow sharing voted AI outputs with Paperclip Labs"
-            hint="Only AI-generated outputs you explicitly vote on are eligible for feedback sharing."
-            checked={!!selectedCompany.feedbackDataSharingEnabled}
-            onChange={(enabled) => feedbackSharingMutation.mutate(enabled)}
-          />
-          <p className="text-sm text-muted-foreground">
-            Votes are always saved locally. This setting controls whether voted AI outputs may also be marked for sharing with Paperclip Labs.
-          </p>
-          <div className="space-y-1 text-xs text-muted-foreground">
-            <div>
-              Terms version: {selectedCompany.feedbackDataSharingTermsVersion ?? DEFAULT_FEEDBACK_DATA_SHARING_TERMS_VERSION}
-            </div>
-            {selectedCompany.feedbackDataSharingConsentAt ? (
-              <div>
-                Enabled {new Date(selectedCompany.feedbackDataSharingConsentAt).toLocaleString()}
-                {selectedCompany.feedbackDataSharingConsentByUserId
-                  ? ` by ${selectedCompany.feedbackDataSharingConsentByUserId}`
-                  : ""}
-              </div>
-            ) : (
-              <div>Sharing is currently disabled.</div>
-            )}
-            {FEEDBACK_TERMS_URL ? (
-              <a
-                href={FEEDBACK_TERMS_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex text-foreground underline underline-offset-4"
-              >
-                Read our terms of service
-              </a>
-            ) : null}
-          </div>
-        </div>
-      </div>
-
-      {/* Invites */}
-      <div className="space-y-4" data-testid="company-settings-invites-section">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Invites
-        </div>
-        <div className="space-y-3 rounded-md border border-border px-4 py-4">
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">
-              Generate an OpenClaw agent invite snippet.
-            </span>
-            <HintIcon text="Creates a short-lived OpenClaw agent invite and renders a copy-ready prompt." />
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              data-testid="company-settings-invites-generate-button"
-              size="sm"
-              onClick={() => inviteMutation.mutate()}
-              disabled={inviteMutation.isPending}
-            >
-              {inviteMutation.isPending
-                ? "Generating..."
-                : "Generate OpenClaw Invite Prompt"}
-            </Button>
-          </div>
-          {inviteError && (
-            <p className="text-sm text-destructive">{inviteError}</p>
-          )}
-          {inviteSnippet && (
-            <div
-              className="rounded-md border border-border bg-muted/30 p-2"
-              data-testid="company-settings-invites-snippet"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-xs text-muted-foreground">
-                  OpenClaw Invite Prompt
-                </div>
-                {snippetCopied && (
-                  <span
-                    key={snippetCopyDelightId}
-                    className="flex items-center gap-1 text-xs text-green-600 animate-pulse"
-                  >
-                    <Check className="h-3 w-3" />
-                    Copied
+                {clearLogoMutation.isError && (
+                  <span className="text-xs text-destructive text-center">
+                    {clearLogoMutation.error.message}
                   </span>
                 )}
               </div>
-              <div className="mt-1 space-y-1.5">
+              <div className="flex-1 space-y-5 w-full">
+                <Field
+                  label="Logo Upload"
+                  hint="Upload a PNG, JPEG, WEBP, GIF, or SVG logo image."
+                >
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+                      onChange={handleLogoFileChange}
+                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none transition-colors file:mr-4 file:rounded-md file:border-0 file:bg-primary/10 file:text-primary file:px-3 file:py-1 file:text-xs file:font-medium hover:file:bg-primary/20 file:cursor-pointer"
+                    />
+                    {(logoUploadMutation.isError || logoUploadError) && (
+                      <span className="text-xs text-destructive block">
+                        {logoUploadError ??
+                          (logoUploadMutation.error instanceof Error
+                            ? logoUploadMutation.error.message
+                            : "Logo upload failed")}
+                      </span>
+                    )}
+                    {logoUploadMutation.isPending && (
+                      <span className="text-xs text-primary animate-pulse block">Uploading logo...</span>
+                    )}
+                  </div>
+                </Field>
+                <Field
+                  label="Brand Color"
+                  hint="Sets the hue for the company icon. Leave empty for auto-generated color."
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <input
+                        type="color"
+                        value={brandColor || "#6366f1"}
+                        onChange={(e) => setBrandColor(e.target.value)}
+                        className="h-10 w-10 cursor-pointer rounded-lg border border-border bg-transparent p-1 transition-transform hover:scale-105"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={brandColor}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "" || /^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                          setBrandColor(v);
+                        }
+                      }}
+                      placeholder="Auto"
+                      className="w-28 rounded-md border border-border bg-transparent px-3 py-2 text-sm font-mono outline-none transition-colors focus:border-primary/50 focus:ring-1 focus:ring-primary/50"
+                    />
+                    {brandColor && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setBrandColor("")}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                </Field>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Save general & appearance button */}
+        {generalDirty && (
+          <div className="flex justify-end sticky bottom-6 z-10 animate-in slide-in-from-bottom-4">
+            <div className="flex items-center gap-3 bg-card/80 backdrop-blur-md p-3 rounded-2xl shadow-xl border border-border/50">
+              <span className="text-sm text-muted-foreground px-2">You have unsaved changes</span>
+              <Button
+                onClick={handleSaveGeneral}
+                disabled={generalMutation.isPending || !companyName.trim()}
+                className="shadow-sm shadow-primary/20"
+              >
+                {generalMutation.isPending ? "Saving..." : "Save changes"}
+              </Button>
+              {generalMutation.isError && (
+                <span className="text-xs text-destructive absolute -top-6 right-4">
+                  {generalMutation.error instanceof Error
+                      ? generalMutation.error.message
+                      : "Failed to save"}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="h-px w-full bg-border/40" />
+
+        {/* Hiring */}
+        <div className="grid gap-6 md:grid-cols-3" data-testid="company-settings-team-section">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">Hiring & Security</h3>
+            <p className="text-sm text-muted-foreground">
+              Manage approval workflows for new agent hires.
+            </p>
+          </div>
+          <div className="md:col-span-2 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+            <ToggleField
+              label="Require board approval for new hires"
+              hint="New agent hires stay pending until approved by board."
+              checked={!!selectedCompany.requireBoardApprovalForNewAgents}
+              onChange={(v) => settingsMutation.mutate(v)}
+              toggleTestId="company-settings-team-approval-toggle"
+            />
+          </div>
+        </div>
+
+        <div className="h-px w-full bg-border/40" />
+
+        {/* Feedback Sharing */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">Feedback Sharing</h3>
+            <p className="text-sm text-muted-foreground">
+              Control data sharing preferences for AI output.
+            </p>
+          </div>
+          <div className="md:col-span-2 space-y-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+            <ToggleField
+              label="Allow sharing voted AI outputs with Paperclip Labs"
+              hint="Only AI-generated outputs you explicitly vote on are eligible for feedback sharing."
+              checked={!!selectedCompany.feedbackDataSharingEnabled}
+              onChange={(enabled) => feedbackSharingMutation.mutate(enabled)}
+            />
+            <div className="mt-4 rounded-lg bg-muted/30 p-4 border border-border/50">
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <div className="flex justify-between items-center">
+                  <span>Terms version:</span>
+                  <span className="font-mono">{selectedCompany.feedbackDataSharingTermsVersion ?? DEFAULT_FEEDBACK_DATA_SHARING_TERMS_VERSION}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Status:</span>
+                  {selectedCompany.feedbackDataSharingConsentAt ? (
+                    <span className="text-foreground">
+                      Enabled {new Date(selectedCompany.feedbackDataSharingConsentAt).toLocaleDateString()}
+                    </span>
+                  ) : (
+                    <span>Disabled</span>
+                  )}
+                </div>
+              </div>
+              {FEEDBACK_TERMS_URL && (
+                <div className="mt-4 pt-3 border-t border-border/50 text-right">
+                  <a
+                    href={FEEDBACK_TERMS_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-primary hover:underline underline-offset-4"
+                  >
+                    Read our terms of service
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="h-px w-full bg-border/40" />
+
+        {/* Invites */}
+        <div className="grid gap-6 md:grid-cols-3" data-testid="company-settings-invites-section">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">Agent Invites</h3>
+            <p className="text-sm text-muted-foreground">
+              Generate invite prompts for new OpenClaw agents to join your workspace.
+            </p>
+          </div>
+          <div className="md:col-span-2 space-y-5 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>Generate OpenClaw agent invite snippet</span>
+                <HintIcon text="Creates a short-lived OpenClaw agent invite and renders a copy-ready prompt." />
+              </div>
+              <Button
+                data-testid="company-settings-invites-generate-button"
+                size="sm"
+                className="shadow-sm"
+                onClick={() => inviteMutation.mutate()}
+                disabled={inviteMutation.isPending}
+              >
+                {inviteMutation.isPending ? "Generating..." : "Generate Prompt"}
+              </Button>
+            </div>
+            
+            {inviteError && (
+              <p className="text-sm text-destructive">{inviteError}</p>
+            )}
+            
+            {inviteSnippet && (
+              <div
+                className="rounded-xl border border-border bg-muted/20 overflow-hidden animate-in fade-in zoom-in-95 duration-300"
+                data-testid="company-settings-invites-snippet"
+              >
+                <div className="flex items-center justify-between border-b border-border/50 bg-muted/40 px-4 py-2.5">
+                  <div className="text-xs font-medium text-foreground uppercase tracking-wide">
+                    OpenClaw Invite Prompt
+                  </div>
+                  {snippetCopied ? (
+                    <span
+                      key={snippetCopyDelightId}
+                      className="flex items-center gap-1.5 text-xs font-medium text-green-600 animate-in fade-in"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                      Copied to clipboard
+                    </span>
+                  ) : (
+                    <Button
+                      data-testid="company-settings-invites-copy-button"
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs px-2 hover:bg-muted"
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(inviteSnippet);
+                          setSnippetCopied(true);
+                          setSnippetCopyDelightId((prev) => prev + 1);
+                          setTimeout(() => setSnippetCopied(false), 2000);
+                        } catch {
+                          // clipboard may not be available
+                        }
+                      }}
+                    >
+                      Copy snippet
+                    </Button>
+                  )}
+                </div>
                 <textarea
                   data-testid="company-settings-invites-snippet-textarea"
-                  className="h-[28rem] w-full rounded-md border border-border bg-background px-2 py-1.5 font-mono text-xs outline-none"
+                  className="h-[24rem] w-full resize-y bg-transparent px-4 py-3 font-mono text-[13px] leading-relaxed outline-none custom-scrollbar"
                   value={inviteSnippet}
                   readOnly
                 />
-                <div className="flex justify-end">
-                  <Button
-                    data-testid="company-settings-invites-copy-button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(inviteSnippet);
-                        setSnippetCopied(true);
-                        setSnippetCopyDelightId((prev) => prev + 1);
-                        setTimeout(() => setSnippetCopied(false), 2000);
-                      } catch {
-                        /* clipboard may not be available */
-                      }
-                    }}
-                  >
-                    {snippetCopied ? "Copied snippet" : "Copy snippet"}
-                  </Button>
-                </div>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Import / Export */}
-      <div className="space-y-4">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Company Packages
-        </div>
-        <div className="rounded-md border border-border px-4 py-4">
-          <p className="text-sm text-muted-foreground">
-            Import and export have moved to dedicated pages accessible from the{" "}
-            <a href="/org" className="underline hover:text-foreground">Org Chart</a> header.
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <Button size="sm" variant="outline" asChild>
-              <Link to="/company/export">
-                <Download className="mr-1.5 h-3.5 w-3.5" />
-                Export
-              </Link>
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <Link to="/company/import">
-                <Upload className="mr-1.5 h-3.5 w-3.5" />
-                Import
-              </Link>
-            </Button>
+            )}
           </div>
         </div>
-      </div>
 
-      {/* Danger Zone */}
-      <div className="space-y-4">
-        <div className="text-xs font-medium text-destructive uppercase tracking-wide">
-          Danger Zone
+        <div className="h-px w-full bg-border/40" />
+
+        {/* Import / Export */}
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">Company Packages</h3>
+            <p className="text-sm text-muted-foreground">
+              Migrate data using imports and exports.
+            </p>
+          </div>
+          <div className="md:col-span-2 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+            <p className="text-sm text-muted-foreground mb-4">
+              Import and export operations are now accessible from the{" "}
+              <a href="/org" className="text-primary hover:underline underline-offset-4">Org Chart</a> header.
+            </p>
+            <div className="flex items-center gap-3">
+              <Button size="sm" variant="outline" className="shadow-sm" asChild>
+                <Link to="/company/export">
+                  <Download className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Export Data
+                </Link>
+              </Button>
+              <Button size="sm" variant="outline" className="shadow-sm" asChild>
+                <Link to="/company/import">
+                  <Upload className="mr-2 h-4 w-4 text-muted-foreground" />
+                  Import Data
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="space-y-3 rounded-md border border-destructive/40 bg-destructive/5 px-4 py-4">
-          <p className="text-sm text-muted-foreground">
-            Archive this company to hide it from the sidebar. This persists in
-            the database.
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              variant="destructive"
-              disabled={
-                archiveMutation.isPending ||
-                selectedCompany.status === "archived"
-              }
-              onClick={() => {
-                if (!selectedCompanyId) return;
-                const confirmed = window.confirm(
-                  `Archive company "${selectedCompany.name}"? It will be hidden from the sidebar.`
-                );
-                if (!confirmed) return;
-                const nextCompanyId =
-                  companies.find(
-                    (company) =>
-                      company.id !== selectedCompanyId &&
-                      company.status !== "archived"
-                  )?.id ?? null;
-                archiveMutation.mutate({
-                  companyId: selectedCompanyId,
-                  nextCompanyId
-                });
-              }}
-            >
-              {archiveMutation.isPending
-                ? "Archiving..."
-                : selectedCompany.status === "archived"
-                ? "Already archived"
-                : "Archive company"}
-            </Button>
-            {archiveMutation.isError && (
-              <span className="text-xs text-destructive">
-                {archiveMutation.error instanceof Error
-                  ? archiveMutation.error.message
-                  : "Failed to archive company"}
-              </span>
-            )}
+
+        <div className="h-px w-full bg-border/40" />
+
+        {/* Danger Zone */}
+        <div className="grid gap-6 md:grid-cols-3 pb-8">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold text-destructive tracking-tight">Danger Zone</h3>
+            <p className="text-sm text-muted-foreground">
+              Irreversible destructive actions.
+            </p>
+          </div>
+          <div className="md:col-span-2 rounded-xl border border-destructive/20 bg-destructive/5 p-6 shadow-sm transition-all hover:shadow-md hover:border-destructive/40">
+            <h4 className="text-sm font-medium text-foreground mb-2">Archive Company</h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              Archive this company to hide it from the sidebar and lock it from further modifications. This persists in the database and cannot be undone.
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="destructive"
+                className="shadow-sm"
+                disabled={
+                  archiveMutation.isPending ||
+                  selectedCompany.status === "archived"
+                }
+                onClick={() => {
+                  if (!selectedCompanyId) return;
+                  const confirmed = window.confirm(
+                    `Are you absolutely sure you want to archive "${selectedCompany.name}"? It will be hidden from the sidebar and effectively locked.`
+                  );
+                  if (!confirmed) return;
+                  const nextCompanyId =
+                    companies.find(
+                      (company) =>
+                        company.id !== selectedCompanyId &&
+                        company.status !== "archived"
+                    )?.id ?? null;
+                  archiveMutation.mutate({
+                    companyId: selectedCompanyId,
+                    nextCompanyId
+                  });
+                }}
+              >
+                {archiveMutation.isPending
+                  ? "Archiving..."
+                  : selectedCompany.status === "archived"
+                  ? "Company is archived"
+                  : "Archive this company"}
+              </Button>
+              {archiveMutation.isError && (
+                <span className="text-sm text-destructive font-medium">
+                  {archiveMutation.error instanceof Error
+                    ? archiveMutation.error.message
+                    : "Failed to archive company"}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

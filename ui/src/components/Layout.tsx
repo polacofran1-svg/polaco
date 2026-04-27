@@ -378,10 +378,11 @@ export function Layout() {
           </div>
         )}
 
-        <div className={cn("flex min-w-0 flex-col", isMobile ? "w-full" : "h-full flex-1")}>
+        <div className={cn("relative flex min-w-0 flex-col", isMobile ? "w-full" : "h-full flex-1")}>
           <div
             className={cn(
-              isMobile && "sticky top-0 z-20 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85",
+              "relative z-10",
+              isMobile && "sticky top-0 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/68",
             )}
           >
             <BreadcrumbBar />
@@ -392,7 +393,7 @@ export function Layout() {
               ref={mainContentRef}
               tabIndex={-1}
               className={cn(
-                "flex-1 p-4 outline-none md:p-6",
+                "relative z-10 flex-1 p-4 outline-none md:p-6",
                 isMobile ? "overflow-visible pb-[calc(5rem+env(safe-area-inset-bottom))]" : "overflow-auto",
               )}
             >

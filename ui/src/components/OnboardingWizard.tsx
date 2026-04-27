@@ -54,18 +54,28 @@ import {
   Check,
   Loader2,
   ChevronDown,
-  X
+  X,
+  ExternalLink
 } from "lucide-react";
 
 
 type Step = 1 | 2 | 3 | 4;
 type AdapterType = string;
 
-const DEFAULT_TASK_DESCRIPTION = `You are the CEO. You set the direction for the company.
+const onboardingSteps = [
+  { step: 1 as Step, label: "Company", icon: Building2, eyebrow: "Foundation", description: "Create the company shell and define the mission." },
+  { step: 2 as Step, label: "Agent", icon: Bot, eyebrow: "Execution", description: "Choose the first operator and how it runs." },
+  { step: 3 as Step, label: "Task", icon: ListTodo, eyebrow: "Work", description: "Seed the first issue so the company can move." },
+  { step: 4 as Step, label: "Launch", icon: Rocket, eyebrow: "Go Live", description: "Review the setup and open the first issue." },
+] as const;
 
-- hire a founding engineer
-- write a hiring plan
-- break the roadmap into concrete tasks and start delegating work`;
+const DEFAULT_TASK_DESCRIPTION = `This is your first task as CEO.
+
+Write a founding team hiring plan document. The plan should cover: which roles to hire first, in what order, and the reasoning behind each decision.
+
+At the end of the document, include a section called "Agents needed" listing which AI agents you would need to hire to execute this plan (e.g. Engineering Agent, Sales Agent, etc.) and what each one would be responsible for.
+
+Once the document is complete, send one hire request approval per agent listed. This task ends when all requests have been sent.`;
 
 export function OnboardingWizard() {
   const { onboardingOpen, onboardingOptions, closeOnboarding } = useDialog();
@@ -124,7 +134,7 @@ export function OnboardingWizard() {
 
   // Step 3
   const [taskTitle, setTaskTitle] = useState(
-    "Hire your first engineer and create a hiring plan"
+    "Create a founding team hiring plan"
   );
   const [taskDescription, setTaskDescription] = useState(
     DEFAULT_TASK_DESCRIPTION
@@ -139,7 +149,7 @@ export function OnboardingWizard() {
     el.style.height = el.scrollHeight + "px";
   }, []);
 
-  // Created entity IDs — pre-populate from existing company when skipping step 1
+  // Created entity IDs â€” pre-populate from existing company when skipping step 1
   const [createdCompanyId, setCreatedCompanyId] = useState<string | null>(
     existingCompanyId ?? null
   );
@@ -281,6 +291,50 @@ export function OnboardingWizard() {
       }));
   }, [filteredModels, adapterType]);
 
+  function openChatGPTWithPrompt(prompt: string) {
+    navigator.clipboard.writeText(prompt).catch(() => {});
+    window.open("https://chatgpt.com/?q=" + encodeURIComponent(prompt), "_blank");
+  }
+
+  function buildCompanyPrompt() {
+    return [
+      "Hola! Voy a configurar una empresa en Saturn, una plataforma de agentes de IA.",
+      "",
+      "Necesito que me ayudes a definir DOS cosas:",
+      "1. Un nombre para mi empresa",
+      "2. Una mision clara de 1-2 oraciones que un agente de IA pueda usar para tomar decisiones de trabajo",
+      "",
+      "IMPORTANTE: Antes de sugerir nada, hazme entre 3 y 4 preguntas para entender bien mi idea. Por ejemplo: a que se dedica, quien es el cliente, que problema resuelve, etc.",
+      "",
+      "Cuando tengas suficiente info, genera el nombre y la mision. La mision debe ser especifica y acotada, no generica. Ejemplo malo: 'Crear valor para clientes'. Ejemplo bueno: 'Automatizar el proceso de facturacion para pequenas empresas de construccion en Latinoamerica'.",
+      "",
+      "Empieza con las preguntas."
+    ].join("\n");
+  }
+
+  function buildTaskPrompt() {
+    const name = companyName.trim() || "[nombre de tu empresa]";
+    const goal = companyGoal.trim();
+    const misionLine = goal ? "\nMision de la empresa: " + goal : "\nMision de la empresa: [mision de tu empresa]";
+    return [
+      "Hola! Necesito definir la PRIMERA tarea del agente CEO de mi empresa en Saturn (plataforma de agentes de IA).",
+      "",
+      "Empresa: " + name + misionLine,
+      "",
+      "Esta primera tarea es clave: debe ser puntual y acotada, no una mision permanente. El CEO la ejecutara una sola vez al arrancar, luego seguira operando con normalidad.",
+      "",
+      "Contexto: en la mayoria de startups, la primera tarea del CEO es crear un plan de contratacion del equipo fundador. Puede que aplique o no segun el caso.",
+      "",
+      "IMPORTANTE: Antes de sugerir nada, hazme 2-3 preguntas para confirmar si un plan de contratacion tiene sentido como primer paso, o si hay algo mas urgente. Por ejemplo: en que etapa esta la empresa, que es lo mas bloqueante ahora mismo, que resultado concreto espero ver.",
+      "",
+      "Cuando tengas suficiente info, genera:",
+      "- Titulo: maximo 8 palabras, accionable (ej: 'Crear plan de contratacion del equipo fundador')",
+      "- Descripcion: que debe producir el agente, como sabe cuando termino, y que acciones NO debe tomar por su cuenta en esta primera tarea.",
+      "",
+      "Empieza con las preguntas."
+    ].join("\n");
+  }
+
   function reset() {
     setStep(1);
     setLoading(false);
@@ -298,7 +352,7 @@ export function OnboardingWizard() {
     setAdapterEnvLoading(false);
     setForceUnsetAnthropicApiKey(false);
     setUnsetAnthropicLoading(false);
-    setTaskTitle("Hire your first engineer and create a hiring plan");
+    setTaskTitle("Create a founding team hiring plan");
     setTaskDescription(DEFAULT_TASK_DESCRIPTION);
     setCreatedCompanyId(null);
     setCreatedCompanyPrefix(null);
@@ -614,6 +668,9 @@ export function OnboardingWizard() {
 
   if (!effectiveOnboardingOpen) return null;
 
+  const activeStepMeta = onboardingSteps.find((entry) => entry.step === step) ?? onboardingSteps[0];
+  const completedSteps = onboardingSteps.filter((entry) => entry.step < step).length;
+
   return (
     <Dialog
       open={effectiveOnboardingOpen}
@@ -625,59 +682,100 @@ export function OnboardingWizard() {
       }}
     >
       <DialogPortal>
-        {/* Plain div instead of DialogOverlay — Radix's overlay wraps in
+        {/* Plain div instead of DialogOverlay â€” Radix's overlay wraps in
             RemoveScroll which blocks wheel events on our custom (non-DialogContent)
             scroll container. A plain div preserves the background without scroll-locking. */}
         <div className="fixed inset-0 z-50 bg-background" />
         <div className="fixed inset-0 z-50 flex" onKeyDown={handleKeyDown}>
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            className="absolute top-4 left-4 z-10 rounded-sm p-1.5 text-muted-foreground/60 hover:text-foreground transition-colors"
-          >
-            <X className="h-5 w-5" />
-            <span className="sr-only">Close</span>
-          </button>
-
-          {/* Left half — form */}
+          {/* Left half â€” form */}
           <div
             className={cn(
-              "w-full flex flex-col overflow-y-auto transition-[width] duration-500 ease-in-out",
-              step === 1 ? "md:w-1/2" : "md:w-full"
+              "flex w-full flex-col overflow-hidden md:flex-1"
             )}
           >
-            <div className="w-full max-w-md mx-auto my-auto px-8 py-12 shrink-0">
+            <div className="flex h-full max-h-[100dvh] w-full max-w-5xl mx-auto flex-col px-5 py-4 shrink-0">
+              <div className="mb-5 rounded-[2rem] border border-border/70 bg-card px-5 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.12)]">
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                    Saturn Onboarding
+                  </p>
+                  <button
+                    onClick={handleClose}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-[color,background-color,border-color] duration-200 hover:border-foreground/18 hover:bg-secondary hover:text-foreground"
+                    aria-label="Close onboarding"
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close onboarding</span>
+                  </button>
+                </div>
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="max-w-2xl">
+                    <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-foreground xl:text-3xl">
+                      Set up the first company, operator, and starter issue
+                    </h2>
+                    <p className="mt-2 text-sm leading-5 text-muted-foreground">
+                      Keep the setup tight. The goal is to get a real company running quickly, with one agent and one useful first task.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:min-w-[280px]">
+                    <div className="rounded-[1.4rem] border border-border bg-background px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Progress</p>
+                      <p className="mt-1.5 text-2xl font-semibold tracking-[-0.03em]">{completedSteps}/4</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Steps completed</p>
+                    </div>
+                    <div className="rounded-[1.4rem] border border-border bg-background px-4 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Current</p>
+                      <p className="mt-1.5 text-base font-semibold tracking-[-0.02em]">{activeStepMeta.label}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{activeStepMeta.eyebrow}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="min-h-0 grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(180px,220px)]">
+                <div className="min-h-0 rounded-[2rem] border border-border/70 bg-card px-5 py-5 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
+              <div className="h-full overflow-y-auto pr-1">
               {/* Progress tabs */}
-              <div className="flex items-center gap-0 mb-8 border-b border-border">
-                {(
-                  [
-                    { step: 1 as Step, label: "Company", icon: Building2 },
-                    { step: 2 as Step, label: "Agent", icon: Bot },
-                    { step: 3 as Step, label: "Task", icon: ListTodo },
-                    { step: 4 as Step, label: "Launch", icon: Rocket }
-                  ] as const
-                ).map(({ step: s, label, icon: Icon }) => (
+              <div className="mb-5 flex flex-wrap items-center gap-2">
+                {onboardingSteps.map(({ step: s, label, icon: Icon }) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => setStep(s)}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 -mb-px transition-colors cursor-pointer",
+                      "inline-flex min-w-[104px] flex-1 items-center justify-center gap-2 rounded-full border px-3 py-2 text-xs font-medium transition-colors cursor-pointer",
                       s === step
-                        ? "border-foreground text-foreground"
-                        : "border-transparent text-muted-foreground hover:text-foreground/70 hover:border-border"
+                        ? "border-foreground bg-secondary text-foreground"
+                        : "border-border text-muted-foreground hover:text-foreground hover:bg-secondary/70"
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5" />
+                    <span className={cn(
+                      "inline-flex h-6 w-6 items-center justify-center rounded-full border",
+                      s === step ? "border-foreground bg-background text-foreground" : "border-border bg-background text-muted-foreground"
+                    )}>
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
                     {label}
                   </button>
                 ))}
               </div>
 
+              <div className="mb-5 rounded-[1.5rem] border border-border/70 bg-muted/15 px-4 py-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  {activeStepMeta.eyebrow}
+                </p>
+                <h3 className="mt-1.5 text-lg font-semibold tracking-[-0.03em] text-foreground xl:text-xl">
+                  {activeStepMeta.label}
+                </h3>
+                <p className="mt-1.5 text-sm leading-5 text-muted-foreground">
+                  {activeStepMeta.description}
+                </p>
+              </div>
+
               {/* Step content */}
               {step === 1 && (
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="space-y-4">
+                  <div className="mb-1 flex items-center gap-3">
                     <div className="bg-muted/50 p-2">
                       <Building2 className="h-5 w-5 text-muted-foreground" />
                     </div>
@@ -688,7 +786,7 @@ export function OnboardingWizard() {
                       </p>
                     </div>
                   </div>
-                  <div className="mt-3 group">
+                  <div className="mt-2 group">
                     <label
                       className={cn(
                         "text-xs mb-1 block transition-colors",
@@ -708,29 +806,42 @@ export function OnboardingWizard() {
                     />
                   </div>
                   <div className="group">
-                    <label
-                      className={cn(
-                        "text-xs mb-1 block transition-colors",
-                        companyGoal.trim()
-                          ? "text-foreground"
-                          : "text-muted-foreground group-focus-within:text-foreground"
-                      )}
-                    >
-                      Mission / goal (optional)
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label
+                        className={cn(
+                          "text-xs transition-colors",
+                          companyGoal.trim()
+                            ? "text-foreground"
+                            : "text-muted-foreground group-focus-within:text-foreground"
+                        )}
+                      >
+                        Mission / goal (optional)
+                      </label>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => openChatGPTWithPrompt(buildCompanyPrompt())}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Generar con ChatGPT
+                      </button>
+                    </div>
                     <textarea
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[60px]"
                       placeholder="What is this company trying to achieve?"
                       value={companyGoal}
                       onChange={(e) => setCompanyGoal(e.target.value)}
                     />
+                    <p className="mt-1.5 text-[11px] text-muted-foreground leading-4">
+                      El agente CEO usará esta misión como contexto para planear y ejecutar trabajo. Se específico - una descripción vaga puede hacer que el agente tome decisiones inesperadas.
+                    </p>
                   </div>
                 </div>
               )}
 
               {step === 2 && (
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="space-y-4">
+                  <div className="mb-1 flex items-center gap-3">
                     <div className="bg-muted/50 p-2">
                       <Bot className="h-5 w-5 text-muted-foreground" />
                     </div>
@@ -764,10 +875,10 @@ export function OnboardingWizard() {
                         <button
                           key={opt.type}
                           className={cn(
-                            "flex flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors relative",
+                            "flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs transition-colors relative",
                             adapterType === opt.type
-                              ? "border-foreground bg-accent"
-                              : "border-border hover:bg-accent/50"
+                              ? "border-foreground bg-secondary"
+                              : "border-border hover:bg-secondary/70"
                           )}
                           onClick={() => {
                             const nextType = opt.type;
@@ -814,12 +925,12 @@ export function OnboardingWizard() {
                              key={opt.type}
                              disabled={!!opt.comingSoon}
                              className={cn(
-                               "flex flex-col items-center gap-1.5 rounded-md border p-3 text-xs transition-colors relative",
+                               "flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs transition-colors relative",
                                opt.comingSoon
                                  ? "border-border opacity-40 cursor-not-allowed"
                                  : adapterType === opt.type
-                                 ? "border-foreground bg-accent"
-                                 : "border-border hover:bg-accent/50"
+                                 ? "border-foreground bg-secondary"
+                                 : "border-border hover:bg-secondary/70"
                              )}
                              onClick={() => {
                                if (opt.comingSoon) return;
@@ -870,7 +981,7 @@ export function OnboardingWizard() {
                           }}
                         >
                           <PopoverTrigger asChild>
-                            <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-accent/50 transition-colors w-full justify-between">
+                            <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm hover:bg-secondary/70 transition-colors w-full justify-between">
                               <span
                                 className={cn(
                                   !model && "text-muted-foreground"
@@ -900,8 +1011,8 @@ export function OnboardingWizard() {
                             {adapterType !== "opencode_local" && (
                               <button
                                 className={cn(
-                                  "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
-                                  !model && "bg-accent"
+                                  "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded hover:bg-secondary/70",
+                                  !model && "bg-secondary"
                                 )}
                                 onClick={() => {
                                   setModel("");
@@ -926,8 +1037,8 @@ export function OnboardingWizard() {
                                     <button
                                       key={m.id}
                                       className={cn(
-                                        "flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-accent/50",
-                                        m.id === model && "bg-accent"
+                                        "flex items-center w-full px-2 py-1.5 text-sm rounded hover:bg-secondary/70",
+                                        m.id === model && "bg-secondary"
                                       )}
                                       onClick={() => {
                                         setModel(m.id);
@@ -1100,23 +1211,32 @@ export function OnboardingWizard() {
               )}
 
               {step === 3 && (
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="space-y-4">
+                  <div className="mb-1 flex items-center gap-3">
                     <div className="bg-muted/50 p-2">
                       <ListTodo className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
                       <h3 className="font-medium">Give it something to do</h3>
                       <p className="text-xs text-muted-foreground">
-                        Give your agent a small task to start with — a bug fix,
-                        a research question, writing a script.
+                        Dale una sola tarea concreta al agente. Mientras más específica, más controlado será su comportamiento. Evita instrucciones abiertas como &apos;haz un plan completo&apos;.
                       </p>
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                      Task title
-                    </label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="text-xs text-muted-foreground">
+                        Task title
+                      </label>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={() => openChatGPTWithPrompt(buildTaskPrompt())}
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Generar con ChatGPT
+                      </button>
+                    </div>
                     <input
                       className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50"
                       placeholder="e.g. Research competitor pricing"
@@ -1131,7 +1251,7 @@ export function OnboardingWizard() {
                     </label>
                     <textarea
                       ref={textareaRef}
-                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[120px] max-h-[300px] overflow-y-auto"
+                      className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-ring placeholder:text-muted-foreground/50 resize-none min-h-[96px] max-h-[180px] overflow-y-auto"
                       placeholder="Add more detail about what the agent should do..."
                       value={taskDescription}
                       onChange={(e) => setTaskDescription(e.target.value)}
@@ -1141,8 +1261,8 @@ export function OnboardingWizard() {
               )}
 
               {step === 4 && (
-                <div className="space-y-5">
-                  <div className="flex items-center gap-3 mb-1">
+                <div className="space-y-4">
+                  <div className="mb-1 flex items-center gap-3">
                     <div className="bg-muted/50 p-2">
                       <Rocket className="h-5 w-5 text-muted-foreground" />
                     </div>
@@ -1154,7 +1274,7 @@ export function OnboardingWizard() {
                       </p>
                     </div>
                   </div>
-                  <div className="border border-border divide-y divide-border">
+                  <div className="border border-border divide-y divide-border rounded-[1.4rem] overflow-hidden">
                     <div className="flex items-center gap-3 px-3 py-2.5">
                       <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -1199,7 +1319,7 @@ export function OnboardingWizard() {
               )}
 
               {/* Footer navigation */}
-              <div className="flex items-center justify-between mt-8">
+              <div className="mt-6 flex items-center justify-between">
                 <div>
                   {step > 1 && step > (onboardingOptions.initialStep ?? 1) && (
                     <Button
@@ -1270,14 +1390,49 @@ export function OnboardingWizard() {
                   )}
                 </div>
               </div>
+              </div>
+                </div>
+
+                <aside className="hidden lg:block">
+                    <div className="rounded-[1.8rem] border border-border/70 bg-card px-4 py-4 shadow-[0_14px_35px_rgba(0,0,0,0.06)]">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      Setup Map
+                    </p>
+                    <div className="mt-4 space-y-3">
+                      {onboardingSteps.map(({ step: entryStep, label, description }) => (
+                        <div
+                          key={entryStep}
+                          className={cn(
+                            "rounded-[1.2rem] border px-3 py-3 transition-colors",
+                            entryStep === step
+                              ? "border-foreground/20 bg-secondary"
+                              : entryStep < step
+                                ? "border-border bg-muted/15"
+                                : "border-border/70 bg-background"
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium text-foreground">{label}</p>
+                            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                              {entryStep < step ? "Done" : entryStep === step ? "Now" : "Next"}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                            {description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </aside>
+              </div>
             </div>
           </div>
 
-          {/* Right half — ASCII art (hidden on mobile) */}
+          {/* Right half â€” ASCII art (hidden on mobile) */}
           <div
             className={cn(
-              "hidden md:block overflow-hidden bg-[#1d1d1d] transition-[width,opacity] duration-500 ease-in-out",
-              step === 1 ? "w-1/2 opacity-100" : "w-0 opacity-0"
+              "hidden overflow-hidden border-l border-border/60 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.05),transparent_28%),linear-gradient(180deg,#111214_0%,#0b0c0f_100%)] md:block md:w-[42%] xl:w-[38%]"
             )}
           >
             <AsciiArtAnimation />
@@ -1323,7 +1478,7 @@ function AdapterEnvironmentResult({
             <span className="font-medium uppercase tracking-wide opacity-80">
               {check.level}
             </span>
-            <span className="mx-1 opacity-60">·</span>
+            <span className="mx-1 opacity-60">Â·</span>
             <span>{check.message}</span>
             {check.detail && (
               <span className="block opacity-75 break-all">
@@ -1341,3 +1496,4 @@ function AdapterEnvironmentResult({
     </div>
   );
 }
+

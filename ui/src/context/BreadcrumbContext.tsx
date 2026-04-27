@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { APP_NAME } from "@/lib/branding";
 
 export interface Breadcrumb {
   label: string;
@@ -39,10 +40,10 @@ export function BreadcrumbProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (breadcrumbs.length === 0) {
-      document.title = "Paperclip";
+      document.title = APP_NAME;
     } else {
       const parts = [...breadcrumbs].reverse().map((b) => b.label);
-      document.title = `${parts.join(" · ")} · Paperclip`;
+      document.title = `${parts.join(" · ")} · ${APP_NAME}`;
     }
   }, [breadcrumbs]);
 

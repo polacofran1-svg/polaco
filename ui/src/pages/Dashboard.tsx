@@ -7,6 +7,7 @@ import { accessApi } from "../api/access";
 import { issuesApi } from "../api/issues";
 import { agentsApi } from "../api/agents";
 import { projectsApi } from "../api/projects";
+import { issueTemplatesApi } from "../api/issue-templates";
 import { buildCompanyUserProfileMap } from "../lib/company-members";
 import { useCompany } from "../context/CompanyContext";
 import { useDialog } from "../context/DialogContext";
@@ -15,11 +16,11 @@ import { queryKeys } from "../lib/queryKeys";
 import { MetricCard } from "../components/MetricCard";
 import { EmptyState } from "../components/EmptyState";
 import { StatusIcon } from "../components/StatusIcon";
-
 import { ActivityRow } from "../components/ActivityRow";
 import { Identity } from "../components/Identity";
+import { GettingStartedChecklist } from "../components/GettingStartedChecklist";
 import { timeAgo } from "../lib/timeAgo";
-import { cn, formatCents } from "../lib/utils";
+import { formatCents } from "../lib/utils";
 import { Bot, CircleDot, DollarSign, ShieldCheck, LayoutDashboard, PauseCircle } from "lucide-react";
 import { ActiveAgentsPanel } from "../components/ActiveAgentsPanel";
 import { ChartCard, RunActivityChart, PriorityChart, IssueStatusChart, SuccessRateChart } from "../components/ActivityCharts";
@@ -83,6 +84,12 @@ export function Dashboard() {
     enabled: !!selectedCompanyId,
   });
 
+  const { data: issueTemplates } = useQuery({
+    queryKey: queryKeys.issueTemplates.list(selectedCompanyId!),
+    queryFn: () => issueTemplatesApi.list(selectedCompanyId!),
+    enabled: !!selectedCompanyId,
+  });
+
   const userProfileMap = useMemo(
     () => buildCompanyUserProfileMap(companyMembers?.users),
     [companyMembers?.users],
@@ -90,6 +97,10 @@ export function Dashboard() {
 
   const recentIssues = issues ? getRecentIssues(issues) : [];
   const recentActivity = useMemo(() => (activity ?? []).slice(0, 10), [activity]);
+  const selectedCompany = useMemo(
+    () => companies.find((company) => company.id === selectedCompanyId) ?? null,
+    [companies, selectedCompanyId],
+  );
 
   useEffect(() => {
     for (const timer of activityAnimationTimersRef.current) {
@@ -192,22 +203,68 @@ export function Dashboard() {
   }
 
   const hasNoAgents = agents !== undefined && agents.length === 0;
+  const openIssueCount = issues?.filter((issue) => issue.status !== "done" && issue.status !== "cancelled").length ?? 0;
+  const liveAgentCount = data?.agents.running ?? 0;
+  const pendingReviewCount = (data?.pendingApprovals ?? 0) + (data?.budgets.pendingApprovals ?? 0);
 
   return (
     <div className="space-y-6">
       {error && <p className="text-sm text-destructive">{error.message}</p>}
 
+      <section className="saturn-surface rounded-[2rem] p-6">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Saturn Overview
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">
+              {selectedCompany?.name ?? "Workspace"} at a glance
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Monitor live agents, review active work, and spot approval or budget pressure before it slows the team down.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
+            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Live</p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{liveAgentCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Agents running now</p>
+            </div>
+            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Open Work</p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{openIssueCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Issues still moving</p>
+            </div>
+            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Review</p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{pendingReviewCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Items awaiting action</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Onboarding checklist */}
+      <GettingStartedChecklist
+        companyId={selectedCompanyId!}
+        hasProjects={(projects ?? []).filter((p) => !p.archivedAt).length > 0}
+        hasAgents={!hasNoAgents}
+        hasTemplates={(issueTemplates ?? []).length > 0}
+        hasIssues={(issues ?? []).length > 0}
+      />
+
       {hasNoAgents && (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
+        <div className="flex items-center justify-between gap-3 rounded-[1.5rem] border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
           <div className="flex items-center gap-2.5">
-            <Bot className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <Bot className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <p className="text-sm text-amber-900 dark:text-amber-100">
               You have no agents.
             </p>
           </div>
           <button
             onClick={() => openOnboarding({ initialStep: 2, companyId: selectedCompanyId! })}
-            className="text-sm font-medium text-amber-700 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100 underline underline-offset-2 shrink-0"
+            className="shrink-0 text-sm font-medium text-amber-700 underline underline-offset-2 hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100"
           >
             Create one here
           </button>
@@ -219,25 +276,25 @@ export function Dashboard() {
       {data && (
         <>
           {data.budgets.activeIncidents > 0 ? (
-            <div className="flex items-start justify-between gap-3 rounded-xl border border-red-500/20 bg-[linear-gradient(180deg,rgba(255,80,80,0.12),rgba(255,255,255,0.02))] px-4 py-3">
+            <div className="flex items-start justify-between gap-3 rounded-[1.5rem] border border-destructive/20 bg-destructive/5 px-4 py-3">
               <div className="flex items-start gap-2.5">
-                <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-300" />
+                <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                 <div>
-                  <p className="text-sm font-medium text-red-50">
+                  <p className="text-sm font-medium text-foreground">
                     {data.budgets.activeIncidents} active budget incident{data.budgets.activeIncidents === 1 ? "" : "s"}
                   </p>
-                  <p className="text-xs text-red-100/70">
+                  <p className="text-xs text-muted-foreground">
                     {data.budgets.pausedAgents} agents paused · {data.budgets.pausedProjects} projects paused · {data.budgets.pendingApprovals} pending budget approvals
                   </p>
                 </div>
               </div>
-              <Link to="/costs" className="text-sm underline underline-offset-2 text-red-100">
+              <Link to="/costs" className="text-sm font-medium text-foreground underline underline-offset-2">
                 Open budgets
               </Link>
             </div>
           ) : null}
 
-          <div className="grid grid-cols-2 xl:grid-cols-4 gap-1 sm:gap-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <MetricCard
               icon={Bot}
               value={data.agents.active + data.agents.running + data.agents.paused + data.agents.error}
@@ -245,9 +302,7 @@ export function Dashboard() {
               to="/agents"
               description={
                 <span>
-                  {data.agents.running} running{", "}
-                  {data.agents.paused} paused{", "}
-                  {data.agents.error} errors
+                  {data.agents.running} running, {data.agents.paused} paused, {data.agents.error} errors
                 </span>
               }
             />
@@ -258,8 +313,7 @@ export function Dashboard() {
               to="/issues"
               description={
                 <span>
-                  {data.tasks.open} open{", "}
-                  {data.tasks.blocked} blocked
+                  {data.tasks.open} open, {data.tasks.blocked} blocked
                 </span>
               }
             />
@@ -291,7 +345,7 @@ export function Dashboard() {
             />
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-4">
             <ChartCard title="Run Activity" subtitle="Last 14 days">
               <RunActivityChart activity={data.runActivity} />
             </ChartCard>
@@ -310,17 +364,21 @@ export function Dashboard() {
             slotTypes={["dashboardWidget"]}
             context={{ companyId: selectedCompanyId }}
             className="grid gap-4 md:grid-cols-2"
-            itemClassName="rounded-lg border bg-card p-4 shadow-sm"
+            itemClassName="rounded-[1.5rem] border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
           />
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Recent Activity */}
+          <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
             {recentActivity.length > 0 && (
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                  Recent Activity
-                </h3>
-                <div className="border border-border divide-y divide-border overflow-hidden">
+              <div className="min-w-0 rounded-[1.75rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+                <div className="mb-3">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Recent Activity
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Fresh movement from people, agents, and workflow events.
+                  </p>
+                </div>
+                <div className="overflow-hidden rounded-[1.25rem] border border-border divide-y divide-border bg-background">
                   {recentActivity.map((event) => (
                     <ActivityRow
                       key={event.id}
@@ -336,30 +394,32 @@ export function Dashboard() {
               </div>
             )}
 
-            {/* Recent Tasks */}
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                Recent Tasks
-              </h3>
+            <div className="min-w-0 rounded-[1.75rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+              <div className="mb-3">
+                <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Recent Tasks
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  The latest issues that changed state or need attention.
+                </p>
+              </div>
               {recentIssues.length === 0 ? (
-                <div className="border border-border p-4">
+                <div className="rounded-[1.25rem] border border-border bg-background p-4">
                   <p className="text-sm text-muted-foreground">No tasks yet.</p>
                 </div>
               ) : (
-                <div className="border border-border divide-y divide-border overflow-hidden">
+                <div className="overflow-hidden rounded-[1.25rem] border border-border divide-y divide-border bg-background">
                   {recentIssues.slice(0, 10).map((issue) => (
                     <Link
                       key={issue.id}
                       to={`/issues/${issue.identifier ?? issue.id}`}
-                      className="px-4 py-3 text-sm cursor-pointer hover:bg-accent/50 transition-colors no-underline text-inherit block"
+                      className="block px-4 py-3 text-inherit no-underline transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[1px] hover:bg-secondary/75"
                     >
                       <div className="flex items-start gap-2 sm:items-center sm:gap-3">
-                        {/* Status icon - left column on mobile */}
                         <span className="shrink-0 sm:hidden">
                           <StatusIcon status={issue.status} />
                         </span>
 
-                        {/* Right column on mobile: title + metadata stacked */}
                         <span className="flex min-w-0 flex-1 flex-col gap-1 sm:contents">
                           <span className="line-clamp-2 text-sm sm:order-2 sm:flex-1 sm:min-w-0 sm:line-clamp-none sm:truncate">
                             {issue.title}
@@ -375,8 +435,8 @@ export function Dashboard() {
                                 ? <span className="hidden sm:inline-flex"><Identity name={name} size="sm" /></span>
                                 : null;
                             })()}
-                            <span className="text-xs text-muted-foreground sm:hidden">&middot;</span>
-                            <span className="text-xs text-muted-foreground shrink-0 sm:order-last">
+                            <span className="text-xs text-muted-foreground sm:hidden">·</span>
+                            <span className="shrink-0 text-xs text-muted-foreground sm:order-last">
                               {timeAgo(issue.updatedAt)}
                             </span>
                           </span>
@@ -388,7 +448,6 @@ export function Dashboard() {
               )}
             </div>
           </div>
-
         </>
       )}
     </div>

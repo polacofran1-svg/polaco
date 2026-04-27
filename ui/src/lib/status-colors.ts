@@ -12,7 +12,7 @@
 /** StatusIcon circle: text + border classes */
 export const issueStatusIcon: Record<string, string> = {
   backlog: "text-muted-foreground border-muted-foreground",
-  todo: "text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400",
+  todo: "text-blue-700 border-blue-700 dark:text-blue-300 dark:border-blue-300",
   in_progress: "text-yellow-600 border-yellow-600 dark:text-yellow-400 dark:border-yellow-400",
   in_review: "text-violet-600 border-violet-600 dark:text-violet-400 dark:border-violet-400",
   done: "text-green-600 border-green-600 dark:text-green-400 dark:border-green-400",
@@ -25,7 +25,7 @@ export const issueStatusIconDefault = "text-muted-foreground border-muted-foregr
 /** Text-only color for issue statuses (dropdowns, labels) */
 export const issueStatusText: Record<string, string> = {
   backlog: "text-muted-foreground",
-  todo: "text-blue-600 dark:text-blue-400",
+  todo: "text-blue-700 dark:text-blue-300",
   in_progress: "text-yellow-600 dark:text-yellow-400",
   in_review: "text-violet-600 dark:text-violet-400",
   done: "text-green-600 dark:text-green-400",
@@ -69,7 +69,7 @@ export const statusBadge: Record<string, string> = {
 
   // Issue statuses — consistent hues with issueStatusIcon above
   backlog: "bg-muted text-muted-foreground",
-  todo: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+  todo: "bg-blue-50 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200",
   in_progress: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
   in_review: "bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300",
   blocked: "bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300",
@@ -103,7 +103,7 @@ export const priorityColor: Record<string, string> = {
   critical: "text-red-600 dark:text-red-400",
   high: "text-orange-600 dark:text-orange-400",
   medium: "text-yellow-600 dark:text-yellow-400",
-  low: "text-blue-600 dark:text-blue-400",
+  low: "text-blue-700 dark:text-blue-300",
 };
 
 export const priorityColorDefault = "text-yellow-600 dark:text-yellow-400";

@@ -41,10 +41,10 @@ export function SidebarNavItem({
       onClick={() => { if (isMobile) setSidebarOpen(false); }}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium transition-colors",
+          "flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-[13px] font-medium tracking-[-0.01em] transition-[background-color,color,box-shadow,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
           isActive
-            ? "bg-accent text-foreground"
-            : "text-foreground/80 hover:bg-accent/50 hover:text-foreground",
+            ? "bg-secondary text-foreground"
+            : "text-foreground/78 hover:-translate-y-[1px] hover:bg-secondary hover:text-foreground hover:shadow-[0_10px_20px_rgba(15,23,42,0.05)]",
           className,
         )
       }
@@ -52,7 +52,7 @@ export function SidebarNavItem({
       <span className="relative shrink-0">
         <Icon className="h-4 w-4" />
         {alert && (
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-red-500 shadow-[0_0_0_2px_hsl(var(--background))]" />
+          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent shadow-[0_0_0_2px_hsl(var(--background))]" />
         )}
       </span>
       <span className="flex-1 truncate">{label}</span>
@@ -61,7 +61,7 @@ export function SidebarNavItem({
           className={cn(
             "ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-medium leading-none",
             textBadgeTone === "amber"
-              ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+              ? "bg-accent/14 text-accent dark:bg-accent/18 dark:text-accent"
               : "bg-muted text-muted-foreground",
           )}
         >
@@ -71,10 +71,10 @@ export function SidebarNavItem({
       {liveCount != null && liveCount > 0 && (
         <span className="ml-auto flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
-            <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+            <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-accent/45 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
           </span>
-          <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">{liveCount} live</span>
+          <span className="text-[11px] font-medium text-accent">{liveCount} live</span>
         </span>
       )}
       {badge != null && badge > 0 && (

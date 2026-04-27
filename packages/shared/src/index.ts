@@ -454,6 +454,15 @@ export {
   type UpsertSidebarOrderPreference,
 } from "./validators/sidebar-preferences.js";
 
+export {
+  issueTemplateSchema,
+  createIssueTemplateBodySchema,
+  updateIssueTemplateBodySchema,
+  type IssueTemplate,
+  type CreateIssueTemplateBody,
+  type UpdateIssueTemplateBody,
+} from "./api/issue-templates.js";
+
 export { workspaceRuntimeControlTargetSchema } from "./validators/execution-workspace.js";
 export {
   findWorkspaceCommandDefinition,

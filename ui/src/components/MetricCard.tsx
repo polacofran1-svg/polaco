@@ -15,20 +15,26 @@ export function MetricCard({ icon: Icon, value, label, description, to, onClick 
   const isClickable = !!(to || onClick);
 
   const inner = (
-    <div className={`h-full px-4 py-4 sm:px-5 sm:py-5 rounded-lg transition-colors${isClickable ? " hover:bg-accent/50 cursor-pointer" : ""}`}>
+    <div
+      className={`h-full rounded-[1.5rem] border border-border bg-card px-4 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-5 sm:py-5${
+        isClickable ? " cursor-pointer hover:-translate-y-[2px] hover:border-foreground/10 hover:bg-secondary/70 hover:shadow-[0_18px_36px_rgba(15,23,42,0.08)]" : ""
+      }`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-2xl sm:text-3xl font-semibold tracking-tight tabular-nums">
+          <p className="text-2xl font-semibold tracking-[-0.03em] tabular-nums sm:text-3xl">
             {value}
           </p>
-          <p className="text-xs sm:text-sm font-medium text-muted-foreground mt-1">
+          <p className="mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground sm:text-xs">
             {label}
           </p>
           {description && (
-            <div className="text-xs text-muted-foreground/70 mt-1.5 hidden sm:block">{description}</div>
+            <div className="mt-2 hidden text-xs leading-5 text-muted-foreground/80 sm:block">{description}</div>
           )}
         </div>
-        <Icon className="h-4 w-4 text-muted-foreground/50 shrink-0 mt-1.5" />
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-secondary text-foreground/75">
+          <Icon className="h-4 w-4" />
+        </span>
       </div>
     </div>
   );

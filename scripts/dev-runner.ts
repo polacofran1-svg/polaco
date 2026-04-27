@@ -421,14 +421,22 @@ async function runPnpm(args: string[], options: {
 
 async function getMigrationStatusPayload() {
   const status = await runPnpm(
-    ["--filter", "@paperclipai/db", "exec", "tsx", "src/migration-status.ts", "--json"],
+    [
+      "--filter",
+      "@paperclipai/db",
+      "exec",
+      "node",
+      "../../cli/node_modules/tsx/dist/cli.mjs",
+      "src/migration-status.ts",
+      "--json",
+    ],
     { env },
   );
   if (status.code !== 0) {
     process.stderr.write(
       status.stderr ||
         status.stdout ||
-        `[paperclip] Command failed with code ${status.code}: pnpm --filter @paperclipai/db exec tsx src/migration-status.ts --json\n`,
+        `[paperclip] Command failed with code ${status.code}: pnpm --filter @paperclipai/db exec node ../../cli/node_modules/tsx/dist/cli.mjs src/migration-status.ts --json\n`,
     );
     process.exit(status.code);
   }

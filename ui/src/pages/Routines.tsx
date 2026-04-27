@@ -15,6 +15,7 @@ import { groupBy } from "../lib/groupBy";
 import { createIssueDetailLocationState } from "../lib/issueDetailBreadcrumb";
 import { getRecentAssigneeIds, sortAgentsByRecency, trackRecentAssignee } from "../lib/recent-assignees";
 import { getRecentProjectIds, trackRecentProject } from "../lib/recent-projects";
+import { getSuggestedRoutineTemplates, routineTemplates, type RoutineTemplate } from "../lib/work-templates";
 import { ToggleSwitch } from "@/components/ui/toggle-switch";
 import { EmptyState } from "../components/EmptyState";
 import { IssuesList } from "../components/IssuesList";
@@ -92,9 +93,31 @@ type RoutineGroup = {
   items: RoutineListItem[];
 };
 
+type RoutineDraft = {
+  title: string;
+  description: string;
+  projectId: string;
+  assigneeAgentId: string;
+  priority: string;
+  concurrencyPolicy: string;
+  catchUpPolicy: string;
+  variables: RoutineVariable[];
+};
+
 const defaultRoutineViewState: RoutineViewState = {
   groupBy: "none",
   collapsedGroups: [],
+};
+
+const initialRoutineDraft: RoutineDraft = {
+  title: "",
+  description: "",
+  projectId: "",
+  assigneeAgentId: "",
+  priority: "medium",
+  concurrencyPolicy: "coalesce_if_active",
+  catchUpPolicy: "skip_missed",
+  variables: [],
 };
 
 function getRoutineViewState(key: string): RoutineViewState {
@@ -131,6 +154,18 @@ function buildRoutineMutationPayload(input: {
     description: input.description.trim() || null,
     projectId: input.projectId || null,
     assigneeAgentId: input.assigneeAgentId || null,
+  };
+}
+
+function buildRoutineDraftFromTemplate(template: RoutineTemplate): RoutineDraft {
+  return {
+    ...initialRoutineDraft,
+    title: template.defaults.title,
+    description: template.defaults.description,
+    priority: template.defaults.priority,
+    concurrencyPolicy: template.defaults.concurrencyPolicy,
+    catchUpPolicy: template.defaults.catchUpPolicy,
+    variables: template.defaults.variables,
   };
 }
 
@@ -304,26 +339,10 @@ export function Routines() {
   const [runDialogRoutine, setRunDialogRoutine] = useState<RoutineListItem | null>(null);
   const [composerOpen, setComposerOpen] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
+  const [showAllRoutineTemplates, setShowAllRoutineTemplates] = useState(false);
   const activeTab: RoutinesTab = searchParams.get("tab") === "runs" ? "runs" : "routines";
-  const [draft, setDraft] = useState<{
-    title: string;
-    description: string;
-    projectId: string;
-    assigneeAgentId: string;
-    priority: string;
-    concurrencyPolicy: string;
-    catchUpPolicy: string;
-    variables: RoutineVariable[];
-  }>({
-    title: "",
-    description: "",
-    projectId: "",
-    assigneeAgentId: "",
-    priority: "medium",
-    concurrencyPolicy: "coalesce_if_active",
-    catchUpPolicy: "skip_missed",
-    variables: [],
-  });
+  const [draft, setDraft] = useState<RoutineDraft>(initialRoutineDraft);
   const routineViewStateKey = selectedCompanyId
     ? `paperclip:routines-view:${selectedCompanyId}`
     : "paperclip:routines-view";
@@ -372,16 +391,8 @@ export function Routines() {
     mutationFn: () =>
       routinesApi.create(selectedCompanyId!, buildRoutineMutationPayload(draft)),
     onSuccess: async (routine) => {
-      setDraft({
-        title: "",
-        description: "",
-        projectId: "",
-        assigneeAgentId: "",
-        priority: "medium",
-        concurrencyPolicy: "coalesce_if_active",
-        catchUpPolicy: "skip_missed",
-        variables: [],
-      });
+      setDraft(initialRoutineDraft);
+      setSelectedTemplateId(null);
       setComposerOpen(false);
       setAdvancedOpen(false);
       await queryClient.invalidateQueries({ queryKey: queryKeys.routines.list(selectedCompanyId!) });
@@ -503,6 +514,11 @@ export function Routines() {
     () => buildRoutineGroups(routines ?? [], routineViewState.groupBy, projectById, agentById),
     [agentById, projectById, routineViewState.groupBy, routines],
   );
+  const activeRoutineCount = (routines ?? []).filter((routine) => routine.status === "active").length;
+  const draftRoutineCount = (routines ?? []).filter(
+    (routine) => routine.status !== "archived" && !routine.assigneeAgentId,
+  ).length;
+  const archivedRoutineCount = (routines ?? []).filter((routine) => routine.status === "archived").length;
   const recentRunsIssueLinkState = useMemo(
     () =>
       createIssueDetailLocationState(
@@ -514,6 +530,26 @@ export function Routines() {
   );
   const currentAssignee = draft.assigneeAgentId ? agentById.get(draft.assigneeAgentId) ?? null : null;
   const currentProject = draft.projectId ? projectById.get(draft.projectId) ?? null : null;
+  const suggestedRoutineTemplates = useMemo(
+    () => getSuggestedRoutineTemplates({ agentCount: agents?.length ?? 0, projectCount: projects?.length ?? 0 }),
+    [agents?.length, projects?.length],
+  );
+  const featuredRoutineTemplates = suggestedRoutineTemplates.slice(0, 3);
+  const additionalRoutineTemplates = suggestedRoutineTemplates.slice(3);
+
+  function openComposerWithTemplate(template: RoutineTemplate) {
+    setSelectedTemplateId(template.id);
+    setDraft(buildRoutineDraftFromTemplate(template));
+    setAdvancedOpen(Boolean(template.defaults.variables.length));
+    setComposerOpen(true);
+  }
+
+  function resetComposer() {
+    setComposerOpen(false);
+    setAdvancedOpen(false);
+    setSelectedTemplateId(null);
+    setDraft(initialRoutineDraft);
+  }
 
   function updateRoutineView(patch: Partial<RoutineViewState>) {
     setRoutineViewState((current) => {
@@ -566,16 +602,116 @@ export function Routines() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Routines
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Recurring work definitions that materialize into auditable execution issues.
-          </p>
+      <section className="saturn-surface rounded-[2rem] p-6">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-3xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              Automation Layer
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl">
+              Define recurring work that reliably turns into execution
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Routines give Saturn repeatable systems. Shape the workflow once, attach the right owner, and let the platform materialize auditable issues over time.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
+            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Active</p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{activeRoutineCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Running schedules</p>
+            </div>
+            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Drafts</p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{draftRoutineCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Need a default owner</p>
+            </div>
+            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Archived</p>
+              <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{archivedRoutineCount}</p>
+              <p className="mt-1 text-xs text-muted-foreground">Inactive automations</p>
+            </div>
+          </div>
         </div>
-        <Button onClick={() => setComposerOpen(true)}>
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Starter loops
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Launch a useful operating pattern fast, then tune ownership and triggers inside the composer.
+            </p>
+          </div>
+        </div>
+        <div className="grid gap-3 xl:grid-cols-3">
+          {featuredRoutineTemplates.map((template) => (
+            <button
+              key={template.id}
+              type="button"
+              onClick={() => openComposerWithTemplate(template)}
+              className="rounded-[1.5rem] border border-border/70 bg-background px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[0_14px_40px_rgba(15,23,42,0.08)]"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-base font-semibold tracking-[-0.02em] text-foreground">{template.label}</span>
+                <span className="rounded-full border border-border/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  {template.cadenceHint}
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{template.summary}</p>
+              <div className="mt-4 inline-flex items-center rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-foreground">
+                Use template
+              </div>
+            </button>
+          ))}
+        </div>
+        {additionalRoutineTemplates.length > 0 ? (
+          <div className="flex justify-start">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-sm text-muted-foreground"
+              onClick={() => setShowAllRoutineTemplates((value) => !value)}
+            >
+              {showAllRoutineTemplates ? "Hide extra templates" : `Browse ${additionalRoutineTemplates.length} more templates`}
+            </Button>
+          </div>
+        ) : null}
+        {showAllRoutineTemplates ? (
+          <div className="grid gap-3 xl:grid-cols-3">
+            {additionalRoutineTemplates.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                onClick={() => openComposerWithTemplate(template)}
+                className="rounded-[1.35rem] border border-border/70 bg-background px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[0_14px_40px_rgba(15,23,42,0.08)]"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-base font-semibold tracking-[-0.02em] text-foreground">{template.label}</span>
+                  <span className="rounded-full border border-border/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    {template.cadenceHint}
+                  </span>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-muted-foreground">{template.summary}</p>
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </section>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted-foreground">
+          Build repeatable systems for research, content, review, and operational follow-through.
+        </p>
+        <Button
+          onClick={() => {
+            setSelectedTemplateId(null);
+            setComposerOpen(true);
+          }}
+        >
           <Plus className="mr-2 h-4 w-4" />
           Create routine
         </Button>
@@ -647,39 +783,118 @@ export function Routines() {
         open={composerOpen}
         onOpenChange={(open) => {
           if (!createRoutine.isPending) {
-            setComposerOpen(open);
+            if (!open) {
+              resetComposer();
+              return;
+            }
+            setComposerOpen(true);
           }
         }}
       >
         <DialogContent
           showCloseButton={false}
-          className="flex max-h-[calc(100dvh-2rem)] max-w-3xl flex-col gap-0 overflow-hidden p-0"
+          className="saturn-modal-shell h-[calc(100dvh-2rem)] max-w-5xl xl:max-w-6xl"
         >
-          <div className="shrink-0 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-3">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">New routine</p>
-              <p className="text-sm text-muted-foreground">
-                Define the recurring work first. Default project and agent are optional for draft routines.
-              </p>
+          <div className="saturn-modal-header">
+            <div className="saturn-modal-inner flex items-start justify-between gap-6">
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">New routine</p>
+                <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-foreground">Shape a repeatable operating loop</h2>
+                <p className="max-w-2xl text-sm text-muted-foreground">
+                  Define the recurring work first. Default project and agent are optional for draft routines.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0"
+                onClick={() => resetComposer()}
+                disabled={createRoutine.isPending}
+              >
+                Cancel
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setComposerOpen(false);
-                setAdvancedOpen(false);
-              }}
-              disabled={createRoutine.isPending}
-            >
-              Cancel
-            </Button>
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <div className="px-5 pt-5 pb-3">
+          <div className="saturn-modal-body">
+            <div className="saturn-modal-section bg-muted/10">
+              <div className="saturn-modal-inner grid gap-3 md:grid-cols-3">
+                <div className="rounded-[1.3rem] border border-border/70 bg-background px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Definition</p>
+                  <p className="mt-2 text-sm text-foreground">Name the loop and describe the recurring job.</p>
+                </div>
+                <div className="rounded-[1.3rem] border border-border/70 bg-background px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Ownership</p>
+                  <p className="mt-2 text-sm text-foreground">Assign the default agent and project when you know them.</p>
+                </div>
+                <div className="rounded-[1.3rem] border border-border/70 bg-background px-4 py-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Delivery</p>
+                  <p className="mt-2 text-sm text-foreground">Tune concurrency and catch-up policy only if the workflow needs it.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="saturn-modal-section">
+              <div className="saturn-modal-inner">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Templates
+                  </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Prefill the loop with a proven starting structure.
+                  </p>
+                </div>
+                {selectedTemplateId ? (
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    onClick={() => setSelectedTemplateId(null)}
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {(showAllRoutineTemplates ? suggestedRoutineTemplates : featuredRoutineTemplates).map((template) => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => openComposerWithTemplate(template)}
+                    className={`flex min-h-[168px] flex-col rounded-[1.2rem] border px-4 py-4 text-left transition-all ${
+                      selectedTemplateId === template.id
+                        ? "border-foreground/20 bg-background shadow-[0_10px_30px_rgba(15,23,42,0.08)]"
+                        : "border-border/70 bg-background/70 hover:border-border hover:bg-background"
+                    }`}
+                  >
+                    <span className="text-base font-semibold leading-6 text-foreground">{template.shortLabel}</span>
+                    <span className="mt-3 inline-flex w-fit rounded-full border border-border/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      {template.cadenceHint}
+                    </span>
+                    <p className="mt-4 text-sm leading-6 text-muted-foreground">{template.summary}</p>
+                  </button>
+                ))}
+              </div>
+              {additionalRoutineTemplates.length > 0 ? (
+                <div className="mt-3 flex justify-start">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="px-0 text-sm text-muted-foreground"
+                    onClick={() => setShowAllRoutineTemplates((value) => !value)}
+                  >
+                    {showAllRoutineTemplates ? "Show fewer templates" : `Show all ${suggestedRoutineTemplates.length} templates`}
+                  </Button>
+                </div>
+              ) : null}
+              </div>
+            </div>
+
+            <div className="saturn-modal-inner">
+            <div className="saturn-modal-section pb-3">
               <textarea
                 ref={titleInputRef}
-                className="w-full resize-none overflow-hidden bg-transparent text-xl font-semibold outline-none placeholder:text-muted-foreground/50"
+                className="w-full resize-none overflow-hidden bg-transparent text-2xl font-semibold tracking-[-0.03em] outline-none placeholder:text-muted-foreground/50"
                 placeholder="Routine title"
                 rows={1}
                 value={draft.title}
@@ -712,7 +927,7 @@ export function Routines() {
 
             <div className="px-5 pb-3">
               <div className="overflow-x-auto overscroll-x-contain">
-                <div className="inline-flex min-w-full flex-wrap items-center gap-2 text-sm text-muted-foreground sm:min-w-max sm:flex-nowrap">
+                <div className="inline-flex min-w-full flex-wrap items-center gap-2 text-sm text-muted-foreground sm:min-w-max sm:flex-nowrap rounded-[1.2rem] border border-border/70 bg-muted/10 px-3 py-3">
                   <span>For</span>
                   <InlineEntitySelector
                     ref={assigneeSelectorRef}
@@ -805,7 +1020,7 @@ export function Routines() {
               </div>
             </div>
 
-            <div className="border-t border-border/60 px-5 py-4">
+            <div className="saturn-modal-section">
               <MarkdownEditor
                 ref={descriptionEditorRef}
                 value={draft.description}
@@ -821,7 +1036,17 @@ export function Routines() {
               />
             </div>
 
-            <div className="border-t border-border/60 px-5 py-3">
+            <div className="saturn-modal-section space-y-3">
+              <RoutineVariablesHint />
+              <RoutineVariablesEditor
+                title={draft.title}
+                description={draft.description}
+                value={draft.variables}
+                onChange={(variables) => setDraft((current) => ({ ...current, variables }))}
+              />
+            </div>
+
+            <div className="saturn-modal-section pt-3">
               <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
                 <CollapsibleTrigger className="flex w-full items-center justify-between text-left">
                   <div>
@@ -870,28 +1095,31 @@ export function Routines() {
                 </CollapsibleContent>
               </Collapsible>
             </div>
+            </div>
           </div>
 
-          <div className="shrink-0 flex flex-col gap-3 border-t border-border/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-muted-foreground">
-              After creation, Paperclip takes you straight to trigger setup. Draft routines stay paused until you add a default agent.
-            </div>
-            <div className="flex flex-col gap-2 sm:items-end">
-              <Button
-                onClick={() => createRoutine.mutate()}
-                disabled={
-                  createRoutine.isPending ||
-                  !draft.title.trim()
-                }
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                {createRoutine.isPending ? "Creating..." : "Create routine"}
-              </Button>
-              {createRoutine.isError ? (
-                <p className="text-sm text-destructive">
-                  {createRoutine.error instanceof Error ? createRoutine.error.message : "Failed to create routine"}
-                </p>
-              ) : null}
+          <div className="saturn-modal-footer">
+            <div className="saturn-modal-inner flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="text-sm text-muted-foreground">
+                After creation, Paperclip takes you straight to trigger setup. Draft routines stay paused until you add a default agent.
+              </div>
+              <div className="flex flex-col gap-2 sm:items-end">
+                <Button
+                  onClick={() => createRoutine.mutate()}
+                  disabled={
+                    createRoutine.isPending ||
+                    !draft.title.trim()
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  {createRoutine.isPending ? "Creating..." : "Create routine"}
+                </Button>
+                {createRoutine.isError ? (
+                  <p className="text-sm text-destructive">
+                    {createRoutine.error instanceof Error ? createRoutine.error.message : "Failed to create routine"}
+                  </p>
+                ) : null}
+              </div>
             </div>
           </div>
         </DialogContent>

@@ -23,6 +23,7 @@ interface IssueRowProps {
   desktopTrailing?: ReactNode;
   trailingMeta?: ReactNode;
   titleSuffix?: ReactNode;
+  titleMeta?: ReactNode;
   unreadState?: UnreadState | null;
   onMarkRead?: () => void;
   onArchive?: () => void;
@@ -41,6 +42,7 @@ export function IssueRow({
   desktopTrailing,
   trailingMeta,
   titleSuffix,
+  titleMeta,
   unreadState = null,
   onMarkRead,
   onArchive,
@@ -63,8 +65,8 @@ export function IssueRow({
       data-inbox-issue-link
       onClickCapture={() => rememberIssueDetailLocationState(issuePathId, detailState)}
       className={cn(
-        "group flex items-start gap-2 border-b border-border py-2.5 pl-2 pr-3 text-sm no-underline text-inherit transition-colors last:border-b-0 sm:items-center sm:py-2 sm:pl-1",
-        selected ? "hover:bg-transparent" : "hover:bg-accent/50",
+        "group flex items-start gap-2 border-b border-border py-3 pl-3 pr-3 text-sm no-underline text-inherit transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] last:border-b-0 sm:items-center sm:py-2.5 sm:pl-3",
+        selected ? "bg-secondary/70 hover:bg-secondary/70" : "hover:-translate-y-[1px] hover:bg-secondary/75",
         className,
       )}
     >
@@ -72,8 +74,15 @@ export function IssueRow({
         {mobileLeading ?? <StatusIcon status={issue.status} className={selectedStatusClass} />}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1 sm:contents">
-        <span className="line-clamp-2 text-sm sm:order-2 sm:min-w-0 sm:flex-1 sm:truncate sm:line-clamp-none">
+        <span className="sm:order-2 sm:min-w-0 sm:flex-1">
+          <span className="line-clamp-2 text-sm font-medium tracking-[-0.01em] sm:block sm:truncate sm:line-clamp-none">
           {issue.title}{titleSuffix}
+          </span>
+          {titleMeta ? (
+            <span className="mt-1 flex flex-wrap items-center gap-1.5">
+              {titleMeta}
+            </span>
+          ) : null}
         </span>
         <span className="flex items-center gap-2 sm:order-1 sm:shrink-0">
           {desktopLeadingSpacer ? (

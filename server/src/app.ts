@@ -205,6 +205,9 @@ export async function createApp(
   if (opts.databaseBackupService) {
     api.use(instanceDatabaseBackupRoutes(opts.databaseBackupService));
   }
+  const { issueTemplateRoutes } = await import("./routes/issue-templates.js");
+  api.use("/companies/:companyId/issue-templates", issueTemplateRoutes(db));
+
   const hostServicesDisposers = new Map<string, () => void>();
   const workerManager = createPluginWorkerManager();
   const pluginRegistry = pluginRegistryService(db);

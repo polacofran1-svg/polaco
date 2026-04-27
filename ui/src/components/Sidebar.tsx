@@ -12,6 +12,8 @@ import {
   Repeat,
   GitBranch,
   Settings,
+  FileText,
+  LayoutTemplate,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { SidebarSection } from "./SidebarSection";
@@ -27,10 +29,13 @@ import { useInboxBadge } from "../hooks/useInboxBadge";
 import { Button } from "@/components/ui/button";
 import { PluginSlotOutlet } from "@/plugins/slots";
 import { SidebarCompanyMenu } from "./SidebarCompanyMenu";
+import { useI18n } from "@/context/I18nContext";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export function Sidebar() {
   const { openNewIssue } = useDialog();
   const { selectedCompanyId, selectedCompany } = useCompany();
+  const { t } = useI18n();
   const inboxBadge = useInboxBadge(selectedCompanyId);
   const { data: experimentalSettings } = useQuery({
     queryKey: queryKeys.instance.experimentalSettings,
@@ -55,34 +60,35 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-60 h-full min-h-0 border-r border-border bg-background flex flex-col">
+    <aside className="saturn-surface flex h-full min-h-0 w-60 flex-col rounded-none border-r border-sidebar-border bg-sidebar">
       {/* Top bar: Company name (bold) + Search — aligned with top sections (no visible border) */}
-      <div className="flex items-center gap-1 px-3 h-12 shrink-0">
+      <div className="flex h-14 shrink-0 items-center gap-1 border-b border-sidebar-border px-3">
         <SidebarCompanyMenu />
         <Button
           variant="ghost"
           size="icon-sm"
-          className="text-muted-foreground shrink-0"
+          className="shrink-0 rounded-2xl text-muted-foreground hover:bg-secondary hover:text-foreground"
           onClick={openSearch}
+          title={t("common.search")}
         >
           <Search className="h-4 w-4" />
         </Button>
       </div>
 
-      <nav className="flex-1 min-h-0 overflow-y-auto scrollbar-auto-hide flex flex-col gap-4 px-3 py-2">
+      <nav className="scrollbar-auto-hide flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 py-3">
         <div className="flex flex-col gap-0.5">
           {/* New Issue button aligned with nav items */}
           <button
             onClick={() => openNewIssue()}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13px] font-medium text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
+            className="flex items-center gap-2.5 rounded-2xl border border-transparent bg-primary px-3 py-2.5 text-[13px] font-semibold text-primary-foreground transition-colors hover:bg-primary/92"
           >
             <SquarePen className="h-4 w-4 shrink-0" />
-            <span className="truncate">New Issue</span>
+            <span className="truncate">{t("sidebar.newIssue")}</span>
           </button>
-          <SidebarNavItem to="/dashboard" label="Dashboard" icon={LayoutDashboard} liveCount={liveRunCount} />
+          <SidebarNavItem to="/dashboard" label={t("sidebar.dashboard")} icon={LayoutDashboard} liveCount={liveRunCount} />
           <SidebarNavItem
             to="/inbox"
-            label="Inbox"
+            label={t("sidebar.inbox")}
             icon={Inbox}
             badge={inboxBadge.inbox}
             badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"}
@@ -97,12 +103,13 @@ export function Sidebar() {
           />
         </div>
 
-        <SidebarSection label="Work">
-          <SidebarNavItem to="/issues" label="Issues" icon={CircleDot} />
-          <SidebarNavItem to="/routines" label="Routines" icon={Repeat} />
-          <SidebarNavItem to="/goals" label="Goals" icon={Target} />
+        <SidebarSection label={t("sidebar.work")}>
+          <SidebarNavItem to="/content" label={t("sidebar.content")} icon={FileText} />
+          <SidebarNavItem to="/issues" label={t("sidebar.issues")} icon={CircleDot} />
+          <SidebarNavItem to="/routines" label={t("sidebar.routines")} icon={Repeat} />
+          <SidebarNavItem to="/goals" label={t("sidebar.goals")} icon={Target} />
           {showWorkspacesLink ? (
-            <SidebarNavItem to="/workspaces" label="Workspaces" icon={GitBranch} />
+            <SidebarNavItem to="/workspaces" label={t("sidebar.workspaces")} icon={GitBranch} />
           ) : null}
         </SidebarSection>
 
@@ -110,12 +117,13 @@ export function Sidebar() {
 
         <SidebarAgents />
 
-        <SidebarSection label="Company">
-          <SidebarNavItem to="/org" label="Org" icon={Network} />
-          <SidebarNavItem to="/skills" label="Skills" icon={Boxes} />
-          <SidebarNavItem to="/costs" label="Costs" icon={DollarSign} />
-          <SidebarNavItem to="/activity" label="Activity" icon={History} />
-          <SidebarNavItem to="/company/settings" label="Settings" icon={Settings} />
+        <SidebarSection label={t("sidebar.company")}>
+          <SidebarNavItem to="/org" label={t("sidebar.org")} icon={Network} />
+          <SidebarNavItem to="/skills" label={t("sidebar.skills")} icon={Boxes} />
+          <SidebarNavItem to="/costs" label={t("sidebar.costs")} icon={DollarSign} />
+          <SidebarNavItem to="/activity" label={t("sidebar.activity")} icon={History} />
+          <SidebarNavItem to="/company/settings" label={t("sidebar.settings")} icon={Settings} />
+          <SidebarNavItem to="/company/templates" label={t("sidebar.templates")} icon={LayoutTemplate} />
         </SidebarSection>
 
         <PluginSlotOutlet
@@ -126,6 +134,11 @@ export function Sidebar() {
           missingBehavior="placeholder"
         />
       </nav>
+
+      {/* Footer Area for Language Switcher */}
+      <div className="shrink-0 border-t border-sidebar-border p-3">
+        <LanguageSwitcher />
+      </div>
     </aside>
   );
 }

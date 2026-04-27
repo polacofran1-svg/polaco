@@ -266,149 +266,172 @@ export function CompanyAccess() {
   const assignedIssues = assignedIssuesQuery.data ?? [];
 
   return (
-    <div className="max-w-6xl space-y-8">
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-lg font-semibold">Company Access</h1>
+    <>
+      <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center gap-3 border-b border-border/40 pb-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20">
+          <ShieldCheck className="h-5 w-5" />
         </div>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Manage company user memberships, membership status, and explicit permission grants for {selectedCompany?.name}.
-        </p>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Company Access</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage company user memberships, membership status, and explicit permission grants for {selectedCompany?.name}.
+          </p>
+        </div>
       </div>
 
       {access && !access.currentUserRole && (
-        <div className="rounded-xl border border-amber-500/40 px-4 py-3 text-sm text-amber-200">
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
           This account can manage access here through instance-admin privileges, but it does not currently hold an active company membership.
         </div>
       )}
 
-      <section className="space-y-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <h2 className="text-base font-semibold">Humans</h2>
-          </div>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Manage human company memberships, status, and grants here.
-          </p>
-        </div>
-
+      <div className="grid gap-12">
         {access?.canApproveJoinRequests && pendingHumanJoinRequests.length > 0 ? (
-          <div className="space-y-3 rounded-xl border border-border px-4 py-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h3 className="text-sm font-semibold">Pending human joins</h3>
+          <>
+            <div className="grid gap-6 md:grid-cols-3">
+              <div className="md:col-span-1 space-y-1.5">
+                <h3 className="text-sm font-semibold tracking-tight text-primary">Pending Joins</h3>
                 <p className="text-sm text-muted-foreground">
                   Review human join requests before they become active company members.
                 </p>
               </div>
-              <Badge variant="outline">{pendingHumanJoinRequests.length} pending</Badge>
+              <div className="md:col-span-2 space-y-4 rounded-xl border border-border/60 bg-card p-6 shadow-sm transition-all hover:shadow-md">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold">Needs review</h3>
+                  <Badge variant="secondary" className="bg-primary/10 text-primary hover:bg-primary/20">
+                    {pendingHumanJoinRequests.length} pending
+                  </Badge>
+                </div>
+                <div className="space-y-3">
+                  {pendingHumanJoinRequests.map((request) => (
+                    <PendingJoinRequestCard
+                      key={request.id}
+                      title={
+                        request.requesterUser?.name ||
+                        request.requestEmailSnapshot ||
+                        request.requestingUserId ||
+                        "Unknown human requester"
+                      }
+                      subtitle={
+                        request.requesterUser?.email ||
+                        request.requestEmailSnapshot ||
+                        request.requestingUserId ||
+                        "No email available"
+                      }
+                      context={
+                        request.invite
+                          ? `${request.invite.allowedJoinTypes} join invite${request.invite.humanRole ? ` • default role ${request.invite.humanRole}` : ""}`
+                          : "Invite metadata unavailable"
+                      }
+                      detail={`Submitted ${new Date(request.createdAt).toLocaleString()}`}
+                      approveLabel="Approve human"
+                      rejectLabel="Reject human"
+                      disabled={joinRequestActionPending}
+                      onApprove={() => approveJoinRequestMutation.mutate(request.id)}
+                      onReject={() => rejectJoinRequestMutation.mutate(request.id)}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="space-y-3">
-              {pendingHumanJoinRequests.map((request) => (
-                <PendingJoinRequestCard
-                  key={request.id}
-                  title={
-                    request.requesterUser?.name ||
-                    request.requestEmailSnapshot ||
-                    request.requestingUserId ||
-                    "Unknown human requester"
-                  }
-                  subtitle={
-                    request.requesterUser?.email ||
-                    request.requestEmailSnapshot ||
-                    request.requestingUserId ||
-                    "No email available"
-                  }
-                  context={
-                    request.invite
-                      ? `${request.invite.allowedJoinTypes} join invite${request.invite.humanRole ? ` • default role ${request.invite.humanRole}` : ""}`
-                      : "Invite metadata unavailable"
-                  }
-                  detail={`Submitted ${new Date(request.createdAt).toLocaleString()}`}
-                  approveLabel="Approve human"
-                  rejectLabel="Reject human"
-                  disabled={joinRequestActionPending}
-                  onApprove={() => approveJoinRequestMutation.mutate(request.id)}
-                  onReject={() => rejectJoinRequestMutation.mutate(request.id)}
-                />
-              ))}
-            </div>
-          </div>
+            <div className="h-px w-full bg-border/40" />
+          </>
         ) : null}
 
-        <div className="overflow-hidden rounded-xl border border-border">
-          <div className="grid grid-cols-[minmax(0,1.5fr)_120px_120px_minmax(0,1.2fr)_180px] gap-3 border-b border-border px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            <div>User account</div>
-            <div>Role</div>
-            <div>Status</div>
-            <div>Grants</div>
-            <div className="text-right">Action</div>
+        <div className="grid gap-6 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-1.5">
+            <h3 className="text-sm font-semibold tracking-tight">Human Members</h3>
+            <p className="text-sm text-muted-foreground">
+              Manage human company memberships, status, and grants here.
+            </p>
           </div>
-          {members.length === 0 ? (
-            <div className="px-4 py-8 text-sm text-muted-foreground">No user memberships found for this company yet.</div>
-          ) : (
-            members.map((member) => {
-              const removalReason = member.removal?.reason ?? null;
-              const canArchive = member.removal?.canArchive ?? true;
-              return (
-                <div
-                  key={member.id}
-                  className="grid grid-cols-[minmax(0,1.5fr)_120px_120px_minmax(0,1.2fr)_180px] gap-3 border-b border-border px-4 py-3 last:border-b-0"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate font-medium">{member.user?.name?.trim() || member.user?.email || member.principalId}</div>
-                    <div className="truncate text-xs text-muted-foreground">{member.user?.email || member.principalId}</div>
-                  </div>
-                  <div className="text-sm">
-                    {member.membershipRole
-                      ? HUMAN_COMPANY_MEMBERSHIP_ROLE_LABELS[member.membershipRole]
-                      : "Unset"}
-                  </div>
-                  <div>
-                    <Badge variant={member.status === "active" ? "secondary" : member.status === "suspended" ? "destructive" : "outline"}>
-                      {member.status.replace("_", " ")}
-                    </Badge>
-                  </div>
-                  <div className="min-w-0 text-sm text-muted-foreground">{formatGrantSummary(member)}</div>
-                  <div className="space-y-1 text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button size="sm" variant="outline" onClick={() => setEditingMemberId(member.id)}>
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setRemovingMemberId(member.id)}
-                        disabled={!canArchive}
-                        title={removalReason ?? undefined}
-                      >
-                        <Trash2 className="mr-1 h-3.5 w-3.5" />
-                        Remove
-                      </Button>
-                    </div>
-                    {removalReason ? (
-                      <div className="text-xs text-muted-foreground">{removalReason}</div>
-                    ) : null}
-                  </div>
+          <div className="md:col-span-2 rounded-xl border border-border/60 bg-card overflow-hidden shadow-sm transition-all hover:shadow-md">
+            <div className="overflow-x-auto">
+              <div className="min-w-[800px]">
+                <div className="grid grid-cols-[minmax(0,1.5fr)_120px_120px_minmax(0,1.2fr)_180px] gap-3 border-b border-border bg-muted/30 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  <div>User account</div>
+                  <div>Role</div>
+                  <div>Status</div>
+                  <div>Grants</div>
+                  <div className="text-right">Action</div>
                 </div>
-              );
-            })
-          )}
+                {members.length === 0 ? (
+                  <div className="px-5 py-8 text-sm text-muted-foreground text-center bg-muted/10">No user memberships found for this company yet.</div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {members.map((member) => {
+                      const removalReason = member.removal?.reason ?? null;
+                      const canArchive = member.removal?.canArchive ?? true;
+                      return (
+                        <div
+                          key={member.id}
+                          className="grid grid-cols-[minmax(0,1.5fr)_120px_120px_minmax(0,1.2fr)_180px] gap-3 px-5 py-4 transition-colors hover:bg-muted/20 items-center"
+                        >
+                          <div className="min-w-0">
+                            <div className="truncate font-medium text-foreground">{member.user?.name?.trim() || member.user?.email || member.principalId}</div>
+                            <div className="truncate text-xs text-muted-foreground mt-0.5">{member.user?.email || member.principalId}</div>
+                          </div>
+                          <div className="text-sm font-medium">
+                            {member.membershipRole
+                              ? HUMAN_COMPANY_MEMBERSHIP_ROLE_LABELS[member.membershipRole]
+                              : "Unset"}
+                          </div>
+                          <div>
+                            <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+                              member.status === 'active' ? 'border-border bg-muted text-foreground' :
+                              member.status === 'suspended' ? 'border-destructive/30 bg-destructive/10 text-destructive' :
+                              'border-amber-500/30 bg-amber-500/10 text-amber-700'
+                            }`}>
+                              {member.status.replace("_", " ")}
+                            </span>
+                          </div>
+                          <div className="min-w-0 text-sm text-muted-foreground leading-tight">
+                            {formatGrantSummary(member)}
+                          </div>
+                          <div className="space-y-1 text-right flex flex-col justify-center">
+                            <div className="flex justify-end gap-2">
+                              <Button size="sm" variant="outline" className="h-8 shadow-sm" onClick={() => setEditingMemberId(member.id)}>
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 shadow-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={() => setRemovingMemberId(member.id)}
+                                disabled={!canArchive}
+                                title={removalReason ?? undefined}
+                              >
+                                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                                Remove
+                              </Button>
+                            </div>
+                            {removalReason ? (
+                              <div className="text-[10px] text-muted-foreground text-right">{removalReason}</div>
+                            ) : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
+    </div>
 
       <Dialog open={!!editingMember} onOpenChange={(open) => !open && setEditingMemberId(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh]">
+          <DialogHeader className="shrink-0">
             <DialogTitle>Edit member</DialogTitle>
             <DialogDescription>
               Update company role, membership status, and explicit grants for {editingMember?.user?.name || editingMember?.user?.email || editingMember?.principalId}.
             </DialogDescription>
           </DialogHeader>
           {editingMember && (
-            <div className="space-y-5">
+            <div className="space-y-5 overflow-y-auto min-h-0 pr-2 pb-2">
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="space-y-2 text-sm">
                   <span className="font-medium">Company role</span>
@@ -504,7 +527,7 @@ export function CompanyAccess() {
               </div>
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="shrink-0 pt-2">
             <Button variant="outline" onClick={() => setEditingMemberId(null)}>
               Cancel
             </Button>
@@ -527,15 +550,15 @@ export function CompanyAccess() {
       </Dialog>
 
       <Dialog open={!!removingMember} onOpenChange={(open) => !open && setRemovingMemberId(null)}>
-        <DialogContent className="max-w-xl">
-          <DialogHeader>
+        <DialogContent className="max-w-xl max-h-[90vh]">
+          <DialogHeader className="shrink-0">
             <DialogTitle>Remove member</DialogTitle>
             <DialogDescription>
               Archive {memberDisplayName(removingMember)} and move active assignments before hiding this user from assignment fields.
             </DialogDescription>
           </DialogHeader>
           {removingMember && (
-            <div className="space-y-5">
+            <div className="space-y-5 overflow-y-auto min-h-0 pr-2 pb-2">
               <div className="rounded-lg border border-border px-3 py-3">
                 <div className="text-sm font-medium">{memberDisplayName(removingMember)}</div>
                 <div className="text-sm text-muted-foreground">{removingMember.user?.email || removingMember.principalId}</div>
@@ -591,7 +614,7 @@ export function CompanyAccess() {
               ) : null}
             </div>
           )}
-          <DialogFooter>
+          <DialogFooter className="shrink-0 pt-2">
             <Button variant="outline" onClick={() => setRemovingMemberId(null)}>
               Cancel
             </Button>
@@ -611,7 +634,7 @@ export function CompanyAccess() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 

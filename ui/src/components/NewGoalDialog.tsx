@@ -21,17 +21,21 @@ import {
   Minimize2,
   Target,
   Layers,
+  X,
 } from "lucide-react";
-import { cn } from "../lib/utils";
 import { MarkdownEditor, type MarkdownEditorRef } from "./MarkdownEditor";
 import { StatusBadge } from "./StatusBadge";
+import { useI18n } from "@/context/I18nContext";
+import { cn } from "../lib/utils";
 
-const levelLabels: Record<string, string> = {
-  company: "Company",
-  team: "Team",
-  agent: "Agent",
-  task: "Task",
-};
+import type { TranslationKey } from "../i18n/dictionaries";
+
+const getLevelLabels = (t: (key: TranslationKey) => string): Record<string, string> => ({
+  company: t("modals.newGoal.company"),
+  team: t("modals.newGoal.team"),
+  agent: t("modals.newGoal.agent"),
+  task: t("modals.newGoal.task"),
+});
 
 export function NewGoalDialog() {
   const { newGoalOpen, newGoalDefaults, closeNewGoal } = useDialog();
@@ -48,6 +52,9 @@ export function NewGoalDialog() {
   const [levelOpen, setLevelOpen] = useState(false);
   const [parentOpen, setParentOpen] = useState(false);
   const descriptionEditorRef = useRef<MarkdownEditorRef>(null);
+  const { t } = useI18n();
+
+  const levelLabels = getLevelLabels(t);
 
   // Apply defaults when dialog opens
   const appliedParentId = parentId || newGoalDefaults.parentId || "";
@@ -121,31 +128,31 @@ export function NewGoalDialog() {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
             {selectedCompany && (
-              <span className="bg-muted px-1.5 py-0.5 rounded text-xs font-medium">
+              <span className="bg-muted px-1.5 py-0.5 rounded text-xs font-medium shrink-0">
                 {selectedCompany.name.slice(0, 3).toUpperCase()}
               </span>
             )}
-            <span className="text-muted-foreground/60">&rsaquo;</span>
-            <span>{newGoalDefaults.parentId ? "New sub-goal" : "New goal"}</span>
+            <span className="text-muted-foreground/60 shrink-0">&rsaquo;</span>
+            <span className="truncate">{newGoalDefaults.parentId ? t("modals.newGoal.subGoalTitle") : t("modals.newGoal.title")}</span>
           </div>
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
-              size="icon-xs"
+              size="icon-sm"
               className="text-muted-foreground"
               onClick={() => setExpanded(!expanded)}
             >
-              {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
             </Button>
             <Button
               variant="ghost"
-              size="icon-xs"
+              size="icon-sm"
               className="text-muted-foreground"
               onClick={() => { reset(); closeNewGoal(); }}
             >
-              <span className="text-lg leading-none">&times;</span>
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -154,7 +161,7 @@ export function NewGoalDialog() {
         <div className="px-4 pt-4 pb-2 shrink-0">
           <input
             className="w-full text-lg font-semibold bg-transparent outline-none placeholder:text-muted-foreground/50"
-            placeholder="Goal title"
+            placeholder={t("modals.newGoal.goalTitlePlaceholder")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             onKeyDown={(e) => {
@@ -173,7 +180,7 @@ export function NewGoalDialog() {
             ref={descriptionEditorRef}
             value={description}
             onChange={setDescription}
-            placeholder="Add description..."
+            placeholder={t("modals.newGoal.addDescription")}
             bordered={false}
             contentClassName={cn("text-sm text-muted-foreground", expanded ? "min-h-[220px]" : "min-h-[120px]")}
             imageUploadHandler={async (file) => {
@@ -235,9 +242,9 @@ export function NewGoalDialog() {
           {/* Parent goal */}
           <Popover open={parentOpen} onOpenChange={setParentOpen}>
             <PopoverTrigger asChild>
-              <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors">
-                <Target className="h-3 w-3 text-muted-foreground" />
-                {currentParent ? currentParent.title : "Parent goal"}
+              <button className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-xs hover:bg-accent/50 transition-colors max-w-[200px]">
+                <Target className="h-3 w-3 text-muted-foreground shrink-0" />
+                <span className="truncate">{currentParent ? currentParent.title : t("modals.newGoal.parentGoal")}</span>
               </button>
             </PopoverTrigger>
             <PopoverContent className="w-48 p-1" align="start">
@@ -248,7 +255,7 @@ export function NewGoalDialog() {
                 )}
                 onClick={() => { setParentId(""); setParentOpen(false); }}
               >
-                No parent
+                {t("modals.newGoal.noParent")}
               </button>
               {(goals ?? []).map((g) => (
                 <button
@@ -273,7 +280,7 @@ export function NewGoalDialog() {
             disabled={!title.trim() || createGoal.isPending}
             onClick={handleSubmit}
           >
-            {createGoal.isPending ? "Creating…" : newGoalDefaults.parentId ? "Create sub-goal" : "Create goal"}
+            {createGoal.isPending ? t("modals.newGoal.creating") : newGoalDefaults.parentId ? t("modals.newGoal.createSubGoal") : t("modals.newGoal.createGoal")}
           </Button>
         </div>
       </DialogContent>

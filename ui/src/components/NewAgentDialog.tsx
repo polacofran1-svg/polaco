@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { listUIAdapters } from "../adapters";
 import { getAdapterDisplay } from "../adapters/adapter-display-registry";
 import { useDisabledAdaptersSync } from "../adapters/use-disabled-adapters";
+import { useI18n } from "@/context/I18nContext";
 
 /**
  * Adapter types that are suitable for agent creation (excludes internal
@@ -36,6 +37,7 @@ export function NewAgentDialog() {
   const navigate = useNavigate();
   const [showAdvancedCards, setShowAdvancedCards] = useState(false);
   const disabledTypes = useDisabledAdaptersSync();
+  const { t } = useI18n();
 
   // Fetch registered adapters from server (syncs disabled store + provides data)
   const { data: serverAdapters } = useQuery({
@@ -115,7 +117,7 @@ export function NewAgentDialog() {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-border">
-          <span className="text-sm text-muted-foreground">Add a new agent</span>
+          <span className="text-sm text-muted-foreground">{t("modals.newAgent.title")}</span>
           <Button
             variant="ghost"
             size="icon-xs"
@@ -138,15 +140,13 @@ export function NewAgentDialog() {
                   <Bot className="h-6 w-6 text-foreground" />
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  We recommend letting your CEO handle agent setup — they know the
-                  org structure and can configure reporting, permissions, and
-                  adapters.
+                  {t("modals.newAgent.recommendation")}
                 </p>
               </div>
 
               <Button className="w-full" size="lg" onClick={handleAskCeo}>
                 <Bot className="h-4 w-4 mr-2" />
-                Ask the CEO to create a new agent
+                {t("modals.newAgent.askCeo")}
               </Button>
 
               {/* Advanced link */}
@@ -155,7 +155,7 @@ export function NewAgentDialog() {
                   className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors"
                   onClick={handleAdvancedConfig}
                 >
-                  I want advanced configuration myself
+                  {t("modals.newAgent.advancedConfig")}
                 </button>
               </div>
             </>
@@ -167,10 +167,10 @@ export function NewAgentDialog() {
                   onClick={() => setShowAdvancedCards(false)}
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
-                  Back
+                  {t("modals.newAgent.back")}
                 </button>
                 <p className="text-sm text-muted-foreground">
-                  Choose your adapter type for advanced setup.
+                  {t("modals.newAgent.advancedSetupDesc")}
                 </p>
               </div>
 
@@ -190,7 +190,7 @@ export function NewAgentDialog() {
                   >
                     {opt.recommended && (
                       <span className="absolute -top-1.5 right-1.5 bg-green-500 text-white text-[9px] font-semibold px-1.5 py-0.5 rounded-full leading-none">
-                        Recommended
+                        {t("modals.newAgent.recommendedBadge")}
                       </span>
                     )}
                     <opt.icon className="h-4 w-4" />

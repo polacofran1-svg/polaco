@@ -34,6 +34,16 @@ function splitMigrationStatements(content: string): string[] {
     .filter((statement) => statement.length > 0);
 }
 
+function normalizeStatementForInspection(statement: string): string {
+  return statement
+    .split(/\r?\n/g)
+    .map((line) => line.replace(/--.*$/g, "").trim())
+    .filter((line) => line.length > 0)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export type MigrationState =
   | { status: "upToDate"; tableCount: number; availableMigrations: string[]; appliedMigrations: string[] }
   | {
@@ -249,6 +259,7 @@ async function applyPendingMigrationsManually(
 
     for (const migrationFile of orderedPendingMigrations) {
       const migrationContent = await readMigrationFileContent(migrationFile);
+      const migrationStatements = splitMigrationStatements(migrationContent);
       const hash = createHash("sha256").update(migrationContent).digest("hex");
       const existingEntry = await migrationHistoryEntryExists(
         sql,
@@ -259,8 +270,15 @@ async function applyPendingMigrationsManually(
       );
       if (existingEntry) continue;
 
+      const statementsToApply: string[] = [];
+      for (const statement of migrationStatements) {
+        const alreadyApplied = await migrationStatementAlreadyApplied(sql, statement);
+        if (alreadyApplied) continue;
+        statementsToApply.push(statement);
+      }
+
       await runInTransaction(sql, async () => {
-        for (const statement of splitMigrationStatements(migrationContent)) {
+        for (const statement of statementsToApply) {
           await sql.unsafe(statement);
         }
 
@@ -311,12 +329,13 @@ async function getMigrationTableColumnNames(
 async function tableExists(
   sql: ReturnType<typeof postgres>,
   tableName: string,
+  schemaName = "public",
 ): Promise<boolean> {
   const rows = await sql<{ exists: boolean }[]>`
     SELECT EXISTS (
       SELECT 1
       FROM information_schema.tables
-      WHERE table_schema = 'public'
+      WHERE table_schema = ${schemaName}
         AND table_name = ${tableName}
     ) AS exists
   `;
@@ -327,12 +346,13 @@ async function columnExists(
   sql: ReturnType<typeof postgres>,
   tableName: string,
   columnName: string,
+  schemaName = "public",
 ): Promise<boolean> {
   const rows = await sql<{ exists: boolean }[]>`
     SELECT EXISTS (
       SELECT 1
       FROM information_schema.columns
-      WHERE table_schema = 'public'
+      WHERE table_schema = ${schemaName}
         AND table_name = ${tableName}
         AND column_name = ${columnName}
     ) AS exists
@@ -343,13 +363,14 @@ async function columnExists(
 async function indexExists(
   sql: ReturnType<typeof postgres>,
   indexName: string,
+  schemaName = "public",
 ): Promise<boolean> {
   const rows = await sql<{ exists: boolean }[]>`
     SELECT EXISTS (
       SELECT 1
       FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE n.nspname = 'public'
+      WHERE n.nspname = ${schemaName}
         AND c.relkind = 'i'
         AND c.relname = ${indexName}
     ) AS exists
@@ -360,13 +381,14 @@ async function indexExists(
 async function constraintExists(
   sql: ReturnType<typeof postgres>,
   constraintName: string,
+  schemaName = "public",
 ): Promise<boolean> {
   const rows = await sql<{ exists: boolean }[]>`
     SELECT EXISTS (
       SELECT 1
       FROM pg_constraint c
       JOIN pg_namespace n ON n.oid = c.connamespace
-      WHERE n.nspname = 'public'
+      WHERE n.nspname = ${schemaName}
         AND c.conname = ${constraintName}
     ) AS exists
   `;
@@ -377,28 +399,76 @@ async function migrationStatementAlreadyApplied(
   sql: ReturnType<typeof postgres>,
   statement: string,
 ): Promise<boolean> {
-  const normalized = statement.replace(/\s+/g, " ").trim();
+  const normalized = normalizeStatementForInspection(statement);
+  if (normalized.length === 0) return true;
+  const optionalSchemaPrefix = String.raw`(?:(?:"([^"]+)")\.)?`;
 
-  const createTableMatch = normalized.match(/^CREATE TABLE(?: IF NOT EXISTS)? "([^"]+)"/i);
+  const createTableMatch = normalized.match(
+    new RegExp(`^CREATE TABLE(?: IF NOT EXISTS)? ${optionalSchemaPrefix}"([^"]+)"`, "i"),
+  );
   if (createTableMatch) {
-    return tableExists(sql, createTableMatch[1]);
+    return tableExists(sql, createTableMatch[2], createTableMatch[1] ?? "public");
   }
 
   const addColumnMatch = normalized.match(
-    /^ALTER TABLE "([^"]+)" ADD COLUMN(?: IF NOT EXISTS)? "([^"]+)"/i,
+    new RegExp(
+      `^ALTER TABLE ${optionalSchemaPrefix}"([^"]+)" ADD COLUMN(?: IF NOT EXISTS)? "([^"]+)"`,
+      "i",
+    ),
   );
   if (addColumnMatch) {
-    return columnExists(sql, addColumnMatch[1], addColumnMatch[2]);
+    return columnExists(sql, addColumnMatch[2], addColumnMatch[3], addColumnMatch[1] ?? "public");
   }
 
-  const createIndexMatch = normalized.match(/^CREATE (?:UNIQUE )?INDEX(?: IF NOT EXISTS)? "([^"]+)"/i);
+  const createIndexMatch = normalized.match(
+    new RegExp(`^CREATE (?:UNIQUE )?INDEX(?: IF NOT EXISTS)? ${optionalSchemaPrefix}"([^"]+)"`, "i"),
+  );
   if (createIndexMatch) {
-    return indexExists(sql, createIndexMatch[1]);
+    return indexExists(sql, createIndexMatch[2], createIndexMatch[1] ?? "public");
+  }
+
+  const dropTableMatch = normalized.match(
+    new RegExp(`^DROP TABLE(?: IF EXISTS)? ${optionalSchemaPrefix}"([^"]+)"`, "i"),
+  );
+  if (dropTableMatch) {
+    return !(await tableExists(sql, dropTableMatch[2], dropTableMatch[1] ?? "public"));
+  }
+
+  const dropColumnMatch = normalized.match(
+    new RegExp(
+      `^ALTER TABLE ${optionalSchemaPrefix}"([^"]+)" DROP COLUMN(?: IF EXISTS)? "([^"]+)"`,
+      "i",
+    ),
+  );
+  if (dropColumnMatch) {
+    return !(await columnExists(
+      sql,
+      dropColumnMatch[2],
+      dropColumnMatch[3],
+      dropColumnMatch[1] ?? "public",
+    ));
+  }
+
+  const dropIndexMatch = normalized.match(
+    new RegExp(`^DROP INDEX(?: IF EXISTS)? ${optionalSchemaPrefix}"([^"]+)"`, "i"),
+  );
+  if (dropIndexMatch) {
+    return !(await indexExists(sql, dropIndexMatch[2], dropIndexMatch[1] ?? "public"));
   }
 
   const addConstraintMatch = normalized.match(/^ALTER TABLE "([^"]+)" ADD CONSTRAINT "([^"]+)"/i);
   if (addConstraintMatch) {
     return constraintExists(sql, addConstraintMatch[2]);
+  }
+
+  const dropConstraintMatch = normalized.match(
+    new RegExp(
+      `^ALTER TABLE ${optionalSchemaPrefix}"([^"]+)" DROP CONSTRAINT(?: IF EXISTS)? "([^"]+)"`,
+      "i",
+    ),
+  );
+  if (dropConstraintMatch) {
+    return !(await constraintExists(sql, dropConstraintMatch[3], dropConstraintMatch[1] ?? "public"));
   }
 
   // If we cannot reason about a statement safely, require manual migration.

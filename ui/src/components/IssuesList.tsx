@@ -49,6 +49,7 @@ import { IssueFiltersPopover } from "./IssueFiltersPopover";
 import { IssueRow } from "./IssueRow";
 import { PageSkeleton } from "./PageSkeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
@@ -56,6 +57,11 @@ import { CircleDot, Plus, ArrowUpDown, Layers, Check, ChevronRight, List, ListTr
 import { KanbanBoard } from "./KanbanBoard";
 import { buildIssueTree, countDescendants } from "../lib/issue-tree";
 import { buildSubIssueDefaultsForViewer } from "../lib/subIssueDefaults";
+import {
+  contentIssueKindLabel,
+  contentIssueStageLabel,
+  isContentIssue,
+} from "../lib/content-issues";
 import type { Issue, Project } from "@paperclipai/shared";
 const ISSUE_SEARCH_DEBOUNCE_MS = 250;
 const ISSUE_SEARCH_RESULT_LIMIT = 200;
@@ -242,7 +248,7 @@ function IssueSearchInput({
 
   return (
     <div className="relative w-48 sm:w-64 md:w-80">
-      <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
       <Input
         value={draftValue}
         onChange={(e) => {
@@ -266,7 +272,7 @@ function IssueSearchInput({
           }
         }}
         placeholder="Search issues..."
-        className="pl-7 text-xs sm:text-sm"
+        className="rounded-2xl pl-9 text-xs sm:text-sm"
         aria-label="Search issues"
         data-page-search-target="true"
       />
@@ -983,6 +989,19 @@ export function IssuesList({
                           <span className="ml-1.5 text-xs text-muted-foreground">
                             ({totalDescendants} sub-task{totalDescendants !== 1 ? "s" : ""})
                           </span>
+                        ) : undefined}
+                        titleMeta={isContentIssue(issue) ? (
+                          <>
+                            <Badge variant="outline" className="border-blue-500/20 bg-blue-500/8 text-blue-700 dark:text-blue-300">
+                              Content
+                            </Badge>
+                            <Badge variant="secondary">
+                              {contentIssueKindLabel(issue)}
+                            </Badge>
+                            <Badge variant="outline" className="text-muted-foreground">
+                              {contentIssueStageLabel(issue.status)}
+                            </Badge>
+                          </>
                         ) : undefined}
                         mobileLeading={
                           hasChildren ? (

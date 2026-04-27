@@ -1,7 +1,7 @@
 import type { Goal } from "@paperclipai/shared";
 import { Link } from "@/lib/router";
 import { StatusBadge } from "./StatusBadge";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Target } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useState } from "react";
 
@@ -27,53 +27,73 @@ function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalN
 
   const inner = (
     <>
-      {hasChildren ? (
-        <button
-          className="p-0.5"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setExpanded(!expanded);
-          }}
-        >
-          <ChevronRight
-            className={cn("h-3 w-3 transition-transform", expanded && "rotate-90")}
-          />
-        </button>
-      ) : (
-        <span className="w-4" />
-      )}
-      <span className="text-xs text-muted-foreground capitalize">{goal.level}</span>
-      <span className="flex-1 truncate">{goal.title}</span>
-      <StatusBadge status={goal.status} />
+      <span
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/70 bg-muted/20 text-muted-foreground"
+      >
+        {hasChildren ? (
+          <button
+            className="flex h-full w-full items-center justify-center rounded-full"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
+          >
+            <ChevronRight
+              className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-90")}
+            />
+          </button>
+        ) : (
+          <Target className="h-3.5 w-3.5" />
+        )}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full border border-border/70 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            {goal.level}
+          </span>
+          <span className="text-sm font-medium text-foreground">{goal.title}</span>
+          {hasChildren ? (
+            <span className="text-xs text-muted-foreground">
+              {children.length} child{children.length === 1 ? "" : "ren"}
+            </span>
+          ) : null}
+        </div>
+        {goal.description ? (
+          <p className="mt-1 line-clamp-2 text-sm leading-6 text-muted-foreground">{goal.description}</p>
+        ) : null}
+      </div>
+      <div className="shrink-0">
+        <StatusBadge status={goal.status} />
+      </div>
     </>
   );
 
   const classes = cn(
-    "flex items-center gap-2 px-3 py-1.5 text-sm transition-colors cursor-pointer hover:bg-accent/50",
+    "group flex items-start gap-3 rounded-[1.15rem] border border-border/70 bg-background px-4 py-4 text-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-accent/10 hover:shadow-[0_12px_32px_rgba(15,23,42,0.06)]",
   );
 
   return (
-    <div>
+    <div className="space-y-2">
       {link ? (
         <Link
           to={link}
           className={cn(classes, "no-underline text-inherit")}
-          style={{ paddingLeft: `${depth * 16 + 12}px` }}
+          style={{ marginLeft: `${depth * 18}px` }}
         >
           {inner}
         </Link>
       ) : (
         <div
           className={classes}
-          style={{ paddingLeft: `${depth * 16 + 12}px` }}
+          style={{ marginLeft: `${depth * 18}px` }}
           onClick={() => onSelect?.(goal)}
         >
           {inner}
         </div>
       )}
       {hasChildren && expanded && (
-        <div>
+        <div className="space-y-2 border-l border-dashed border-border/70 pl-3">
           {children.map((child) => (
             <GoalNode
               key={child.id}
@@ -100,7 +120,7 @@ export function GoalTree({ goals, goalLink, onSelect }: GoalTreeProps) {
   }
 
   return (
-    <div className="border border-border py-1">
+    <div className="space-y-3">
       {roots.map((goal) => (
         <GoalNode
           key={goal.id}

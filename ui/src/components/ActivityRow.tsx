@@ -71,8 +71,8 @@ export function ActivityRow({ event, agentMap, userProfileMap, entityNameMap, en
   );
 
   const classes = cn(
-    "px-4 py-2 text-sm",
-    link && "cursor-pointer hover:bg-accent/50 transition-colors",
+    "px-4 py-3 text-sm transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]",
+    link && "cursor-pointer hover:bg-secondary/75 hover:-translate-y-[1px]",
     className,
   );
 

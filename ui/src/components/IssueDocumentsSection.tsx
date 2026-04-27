@@ -813,7 +813,7 @@ export function IssueDocumentsSection({
               key={doc.id}
               id={`document-${doc.key}`}
               className={cn(
-                "rounded-lg border border-border p-3 transition-colors duration-1000",
+                "rounded-[1.5rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[background-color,border-color,box-shadow] duration-300",
                 highlightDocumentKey === doc.key && "border-primary/50 bg-primary/5",
               )}
             >
@@ -822,7 +822,7 @@ export function IssueDocumentsSection({
                   <div className="flex items-center gap-2 min-w-0">
                     <button
                       type="button"
-                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                       onClick={() => toggleFoldedDocument(doc.key)}
                       aria-label={isFolded ? `Expand ${doc.key} document` : `Collapse ${doc.key} document`}
                       aria-expanded={!isFolded}
@@ -977,7 +977,7 @@ export function IssueDocumentsSection({
                     : undefined}
                 >
                   {isHistoricalPreview && selectedHistoricalRevision && (
-                    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-3">
+                      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-3 py-3">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="space-y-1">
                           <p className="text-sm font-medium text-amber-200">
@@ -1012,7 +1012,7 @@ export function IssueDocumentsSection({
                     </div>
                   )}
                   {activeConflict && !isHistoricalPreview && (
-                    <div className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-3">
+                    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 px-3 py-3">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="space-y-1">
                           <p className="text-sm font-medium text-amber-200">Out of date</p>
@@ -1058,7 +1058,7 @@ export function IssueDocumentsSection({
                         </div>
                       </div>
                       {activeConflict.showRemote && (
-                        <div className="mt-3 rounded-md border border-border/70 bg-background/60 p-3">
+                        <div className="mt-3 rounded-2xl border border-border/70 bg-background/60 p-3">
                           <div className="mb-2 flex items-center gap-2 text-[11px] text-muted-foreground">
                             <span>Remote revision {activeConflict.serverDocument.latestRevisionNumber}</span>
                             <span>•</span>
@@ -1088,7 +1088,7 @@ export function IssueDocumentsSection({
                     }`}
                   >
                     {isHistoricalPreview ? (
-                      <div className="rounded-md border border-amber-500/20 bg-background/50 p-3">
+                      <div className="rounded-2xl border border-amber-500/20 bg-background/50 p-3">
                         {renderBody(displayedBody, documentBodyContentClassName)}
                       </div>
                     ) : activeDraft ? (
@@ -1112,7 +1112,7 @@ export function IssueDocumentsSection({
                         onSubmit={() => void commitDraft(activeDraft ?? draft, { clearAfterSave: false, trackAutosave: true })}
                       />
                     ) : (
-                      <div className="rounded-md border border-border/60 bg-background/40 p-3">
+                      <div className="rounded-2xl border border-border/60 bg-background/40 p-3">
                         {renderBody(displayedBody, documentBodyContentClassName)}
                       </div>
                     )}
@@ -1160,7 +1160,7 @@ export function IssueDocumentsSection({
               ) : null}
 
               {confirmDeleteKey === doc.key && (
-                <div className="mt-3 flex items-center justify-between gap-3 rounded-md border border-destructive/20 bg-destructive/5 px-4 py-3">
+                <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-destructive/20 bg-destructive/5 px-4 py-3">
                   <p className="text-sm text-destructive font-medium">
                     Delete this document? This cannot be undone.
                   </p>
