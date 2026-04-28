@@ -1061,7 +1061,7 @@ export function IssueProperties({
   );
 
   return (
-    <div className="rounded-[1.75rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] space-y-4">
+    <div className="rounded-4xl border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] space-y-4">
         <div className="space-y-1">
           {isContentIssue(issue) ? (
             <PropertyRow label="Editorial">

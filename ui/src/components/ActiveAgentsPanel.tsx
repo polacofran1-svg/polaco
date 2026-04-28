@@ -72,7 +72,7 @@ export function ActiveAgentsPanel({ companyId }: ActiveAgentsPanelProps) {
         </div>
       </div>
       {runs.length === 0 ? (
-        <div className="rounded-[1.5rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+        <div className="rounded-3xl border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
           <p className="text-sm text-muted-foreground">No recent agent runs.</p>
         </div>
       ) : (
@@ -118,7 +118,7 @@ const AgentRunCard = memo(function AgentRunCard({
 }) {
   return (
     <div className={cn(
-      "flex h-[320px] flex-col overflow-hidden rounded-[1.5rem] border shadow-[0_12px_30px_rgba(15,23,42,0.05)] transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px]",
+      "flex h-[320px] flex-col overflow-hidden rounded-3xl border shadow-[0_12px_30px_rgba(15,23,42,0.05)] transition-[transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px]",
       isActive
         ? "border-accent/35 bg-accent/[0.05] shadow-[0_18px_38px_rgba(37,99,235,0.10)]"
         : "border-border bg-card",

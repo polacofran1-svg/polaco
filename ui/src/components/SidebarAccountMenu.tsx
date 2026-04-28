@@ -161,7 +161,7 @@ export function SidebarAccountMenu({
           side="top"
           align="start"
           sideOffset={10}
-          className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-[1.4rem] border-border bg-popover p-0 shadow-[0_32px_80px_rgba(0,0,0,0.28)]"
+          className="w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-3xl border-border bg-popover p-0 shadow-[0_32px_80px_rgba(0,0,0,0.28)]"
         >
           <div className="h-24 bg-[linear-gradient(135deg,#111_0%,#1f2937_52%,#2563eb_100%)]" />
           <div className="-mt-8 px-4 pb-4">

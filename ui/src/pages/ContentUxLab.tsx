@@ -335,7 +335,7 @@ export function ContentUxLab() {
 
   return (
     <div className="space-y-6">
-      <section className="saturn-surface rounded-[2rem] p-6">
+      <section className="saturn-surface rounded-5xl p-6">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -350,17 +350,17 @@ export function ContentUxLab() {
           </div>
 
           <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Queue</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{contentIssues.length}</p>
               <p className="mt-1 text-xs text-muted-foreground">Content-linked issues</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Ready</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{readyCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Drafts needing polish</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Published</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{publishedCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Closed as shipped</p>
@@ -434,7 +434,7 @@ export function ContentUxLab() {
                 <div className="mb-4 space-y-4">
                   {structuredDraft.mode === "x-thread" ? (
                     <div className="space-y-3">
-                      <div className="rounded-[1.55rem] border border-border/70 bg-background p-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
+                      <div className="rounded-3xl border border-border/70 bg-background p-4 shadow-[0_18px_40px_rgba(0,0,0,0.18)]">
                         <div className="mb-3 flex items-center justify-between gap-3">
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -448,14 +448,14 @@ export function ContentUxLab() {
                             {estimateCharacterCount(structuredDraft.hook)}/280
                           </Badge>
                         </div>
-                        <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-5">
+                        <div className="rounded-2xl border border-border/70 bg-muted/15 p-5">
                           <p className="whitespace-pre-wrap text-[17px] leading-8 text-foreground">
                             {structuredDraft.hook || "No opening hook generated yet."}
                           </p>
                         </div>
                       </div>
 
-                      <div className="rounded-[1.55rem] border border-border/70 bg-background p-4">
+                      <div className="rounded-3xl border border-border/70 bg-background p-4">
                         <div className="mb-3 flex items-center justify-between gap-3">
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -469,7 +469,7 @@ export function ContentUxLab() {
                             {estimateCharacterCount(structuredDraft.context)}/280
                           </Badge>
                         </div>
-                        <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-5">
+                        <div className="rounded-2xl border border-border/70 bg-muted/15 p-5">
                           <p className="whitespace-pre-wrap text-[15px] leading-7 text-foreground/92">
                             {structuredDraft.context || "No context block generated yet."}
                           </p>
@@ -489,7 +489,7 @@ export function ContentUxLab() {
                       </div>
 
                       {cleanSections(structuredDraft.posts).map((segment, index) => (
-                        <div key={`segment-${index}`} className="rounded-[1.4rem] border border-border/70 bg-background p-4">
+                        <div key={`segment-${index}`} className="rounded-3xl border border-border/70 bg-background p-4">
                           <div className="mb-3 flex items-center justify-between gap-3">
                             <div>
                               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -503,7 +503,7 @@ export function ContentUxLab() {
                               {estimateCharacterCount(segment) > 280 ? "Too long" : "Ready"}
                             </Badge>
                           </div>
-                          <div className="rounded-[1.15rem] border border-border/70 bg-muted/15 p-5">
+                          <div className="rounded-2xl border border-border/70 bg-muted/15 p-5">
                             <p className="whitespace-pre-wrap text-[15px] leading-7 text-foreground/92">{segment}</p>
                           </div>
                         </div>
@@ -512,8 +512,8 @@ export function ContentUxLab() {
                   ) : null}
 
                   {structuredDraft.mode === "reddit-post" ? (
-                    <div className="space-y-3 rounded-[1.6rem] border border-border/70 bg-background p-4">
-                      <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                    <div className="space-y-3 rounded-3xl border border-border/70 bg-background p-4">
+                      <div className="rounded-2xl border border-border/70 bg-muted/15 p-4">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Post title
                         </p>
@@ -521,7 +521,7 @@ export function ContentUxLab() {
                           {draftBody ? (structuredDraft.title || activeIssue.title) : "No title generated yet."}
                         </p>
                       </div>
-                      <div className="rounded-[1.25rem] border border-border/70 bg-muted/15 p-4">
+                      <div className="rounded-2xl border border-border/70 bg-muted/15 p-4">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Body
                         </p>
@@ -533,12 +533,12 @@ export function ContentUxLab() {
                   ) : null}
 
                   {structuredDraft.mode === "content-brief" ? (
-                    <div className="space-y-4 rounded-[1.6rem] border border-border/70 bg-background p-5">
+                    <div className="space-y-4 rounded-3xl border border-border/70 bg-background p-5">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Headline
                         </p>
-                        <div className="mt-2 rounded-[1.2rem] border border-border/70 bg-muted/15 px-4 py-4">
+                        <div className="mt-2 rounded-2xl border border-border/70 bg-muted/15 px-4 py-4">
                           <p className="text-lg font-semibold leading-7 text-foreground">
                             {draftBody ? (structuredDraft.headline || activeIssue.title) : "No headline generated yet."}
                           </p>
@@ -557,7 +557,7 @@ export function ContentUxLab() {
                       </div>
                       <div className="space-y-3">
                         {cleanSections(structuredDraft.sections).map((section, index) => (
-                          <div key={`brief-section-${index}`} className="rounded-[1.35rem] border border-border/70 bg-background p-4">
+                          <div key={`brief-section-${index}`} className="rounded-2xl border border-border/70 bg-background p-4">
                             <div className="mb-3 flex items-center justify-between gap-3">
                               <div>
                                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -569,13 +569,13 @@ export function ContentUxLab() {
                               </div>
                               <Badge variant="outline">Section</Badge>
                             </div>
-                            <div className="rounded-[1.1rem] border border-border/70 bg-muted/15 p-5">
+                            <div className="rounded-2xl border border-border/70 bg-muted/15 p-5">
                               <p className="whitespace-pre-wrap text-[15px] leading-7 text-foreground/92">{section}</p>
                             </div>
                           </div>
                         ))}
                       </div>
-                      <div className="rounded-[1.35rem] border border-dashed border-border/70 bg-muted/10 p-4">
+                      <div className="rounded-2xl border border-dashed border-border/70 bg-muted/10 p-4">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                           Writing guidance
                         </p>
@@ -606,14 +606,14 @@ export function ContentUxLab() {
                     : "lg:border-t-0 lg:border-l"
                 }`}
               >
-                <section className="mb-5 rounded-[1.35rem] border border-border/70 bg-background p-4">
+                <section className="mb-5 rounded-2xl border border-border/70 bg-background p-4">
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Why This Matters
                   </h3>
                   <p className="text-sm leading-6 text-foreground/90">{inferWhyThisMatters(activeIssue)}</p>
                 </section>
 
-                <section className="mb-5 rounded-[1.35rem] border border-border/70 bg-background p-4">
+                <section className="mb-5 rounded-2xl border border-border/70 bg-background p-4">
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Sources
                   </h3>
@@ -637,7 +637,7 @@ export function ContentUxLab() {
                   </div>
                 </section>
 
-                <section className="rounded-[1.35rem] border border-border/70 bg-background p-4">
+                <section className="rounded-2xl border border-border/70 bg-background p-4">
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Notes
                   </h3>

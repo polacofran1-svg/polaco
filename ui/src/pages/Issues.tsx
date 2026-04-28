@@ -143,7 +143,7 @@ export function Issues() {
 
   return (
     <div className="space-y-6">
-      <section className="saturn-surface rounded-[2rem] p-6">
+      <section className="saturn-surface rounded-5xl p-6">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -158,17 +158,17 @@ export function Issues() {
           </div>
 
           <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Open</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{openIssueCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Issues in motion</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Blocked</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{blockedIssueCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Need attention</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Editorial</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{editorialReviewCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">{contentIssueCount} content issue{contentIssueCount === 1 ? "" : "s"}</p>
@@ -177,7 +177,7 @@ export function Issues() {
         </div>
       </section>
 
-      <section className="rounded-[1.75rem] border border-border/70 bg-card px-5 py-4">
+      <section className="rounded-4xl border border-border/70 bg-card px-5 py-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">

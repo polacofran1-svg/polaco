@@ -16,7 +16,7 @@ export function MetricCard({ icon: Icon, value, label, description, to, onClick 
 
   const inner = (
     <div
-      className={`h-full rounded-[1.5rem] border border-border bg-card px-4 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-5 sm:py-5${
+      className={`h-full rounded-3xl border border-border bg-card px-4 py-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[background-color,transform,box-shadow,border-color] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-5 sm:py-5${
         isClickable ? " cursor-pointer hover:-translate-y-[2px] hover:border-foreground/10 hover:bg-secondary/70 hover:shadow-[0_18px_36px_rgba(15,23,42,0.08)]" : ""
       }`}
     >

@@ -694,7 +694,7 @@ export function OnboardingWizard() {
             )}
           >
             <div className="flex h-full max-h-[100dvh] w-full max-w-5xl mx-auto flex-col px-5 py-4 shrink-0">
-              <div className="mb-5 rounded-[2rem] border border-border/70 bg-card px-5 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.12)]">
+              <div className="mb-5 rounded-5xl border border-border/70 bg-card px-5 py-4 shadow-[0_18px_50px_rgba(0,0,0,0.12)]">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                     Saturn Onboarding
@@ -718,12 +718,12 @@ export function OnboardingWizard() {
                     </p>
                   </div>
                   <div className="grid grid-cols-2 gap-3 sm:min-w-[280px]">
-                    <div className="rounded-[1.4rem] border border-border bg-background px-4 py-3">
+                    <div className="rounded-3xl border border-border bg-background px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Progress</p>
                       <p className="mt-1.5 text-2xl font-semibold tracking-[-0.03em]">{completedSteps}/4</p>
                       <p className="mt-1 text-xs text-muted-foreground">Steps completed</p>
                     </div>
-                    <div className="rounded-[1.4rem] border border-border bg-background px-4 py-3">
+                    <div className="rounded-3xl border border-border bg-background px-4 py-3">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Current</p>
                       <p className="mt-1.5 text-base font-semibold tracking-[-0.02em]">{activeStepMeta.label}</p>
                       <p className="mt-1 text-xs text-muted-foreground">{activeStepMeta.eyebrow}</p>
@@ -733,7 +733,7 @@ export function OnboardingWizard() {
               </div>
 
               <div className="min-h-0 grid flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(180px,220px)]">
-                <div className="min-h-0 rounded-[2rem] border border-border/70 bg-card px-5 py-5 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
+                <div className="min-h-0 rounded-5xl border border-border/70 bg-card px-5 py-5 shadow-[0_14px_35px_rgba(0,0,0,0.08)]">
               <div className="h-full overflow-y-auto pr-1">
               {/* Progress tabs */}
               <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -760,7 +760,7 @@ export function OnboardingWizard() {
                 ))}
               </div>
 
-              <div className="mb-5 rounded-[1.5rem] border border-border/70 bg-muted/15 px-4 py-3">
+              <div className="mb-5 rounded-3xl border border-border/70 bg-muted/15 px-4 py-3">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   {activeStepMeta.eyebrow}
                 </p>
@@ -1274,7 +1274,7 @@ export function OnboardingWizard() {
                       </p>
                     </div>
                   </div>
-                  <div className="border border-border divide-y divide-border rounded-[1.4rem] overflow-hidden">
+                  <div className="border border-border divide-y divide-border rounded-3xl overflow-hidden">
                     <div className="flex items-center gap-3 px-3 py-2.5">
                       <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -1394,7 +1394,7 @@ export function OnboardingWizard() {
                 </div>
 
                 <aside className="hidden lg:block">
-                    <div className="rounded-[1.8rem] border border-border/70 bg-card px-4 py-4 shadow-[0_14px_35px_rgba(0,0,0,0.06)]">
+                    <div className="rounded-4xl border border-border/70 bg-card px-4 py-4 shadow-[0_14px_35px_rgba(0,0,0,0.06)]">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                       Setup Map
                     </p>
@@ -1403,7 +1403,7 @@ export function OnboardingWizard() {
                         <div
                           key={entryStep}
                           className={cn(
-                            "rounded-[1.2rem] border px-3 py-3 transition-colors",
+                            "rounded-2xl border px-3 py-3 transition-colors",
                             entryStep === step
                               ? "border-foreground/20 bg-secondary"
                               : entryStep < step

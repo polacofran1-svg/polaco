@@ -75,7 +75,7 @@ export function Goals() {
   if (!goals || goals.length === 0) {
     return (
       <div className="space-y-6">
-        <section className="saturn-surface rounded-[2rem] p-6">
+        <section className="saturn-surface rounded-5xl p-6">
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -97,7 +97,7 @@ export function Goals() {
 
         <section className="grid gap-3 xl:grid-cols-4">
           {goalsByLevel.map((entry) => (
-            <div key={entry.level} className="rounded-[1.5rem] border border-border/70 bg-background px-5 py-5">
+            <div key={entry.level} className="rounded-3xl border border-border/70 bg-background px-5 py-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{entry.label}</p>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">{entry.description}</p>
             </div>
@@ -118,7 +118,7 @@ export function Goals() {
     <div className="space-y-6">
       {error ? <p className="text-sm text-destructive">{error.message}</p> : null}
 
-      <section className="saturn-surface rounded-[2rem] p-6">
+      <section className="saturn-surface rounded-5xl p-6">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -133,22 +133,22 @@ export function Goals() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:min-w-[420px] xl:grid-cols-4">
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Roots</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{goalStats.roots}</p>
               <p className="mt-1 text-xs text-muted-foreground">Top-level initiatives</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Active</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{goalStats.active}</p>
               <p className="mt-1 text-xs text-muted-foreground">Currently in motion</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Planned</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{goalStats.planned}</p>
               <p className="mt-1 text-xs text-muted-foreground">Waiting to activate</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Achieved</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{goalStats.achieved}</p>
               <p className="mt-1 text-xs text-muted-foreground">Closed successfully</p>
@@ -159,7 +159,7 @@ export function Goals() {
 
       <section className="grid gap-3 xl:grid-cols-4">
         {goalsByLevel.map((entry) => (
-          <div key={entry.level} className="rounded-[1.5rem] border border-border/70 bg-background px-5 py-5">
+          <div key={entry.level} className="rounded-3xl border border-border/70 bg-background px-5 py-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">{entry.label}</p>
             <p className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">{entry.count}</p>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">{entry.description}</p>
@@ -168,7 +168,7 @@ export function Goals() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.35fr_0.8fr]">
-        <div className="rounded-[1.75rem] border border-border/70 bg-background p-5">
+        <div className="rounded-4xl border border-border/70 bg-background p-5">
           <div className="flex flex-col gap-3 border-b border-border/60 pb-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -193,7 +193,7 @@ export function Goals() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[1.75rem] border border-border/70 bg-background p-5">
+          <div className="rounded-4xl border border-border/70 bg-background p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/70 bg-muted/20 text-muted-foreground">
                 <Layers3 className="h-4 w-4" />
@@ -206,41 +206,41 @@ export function Goals() {
               </div>
             </div>
             <div className="mt-4 space-y-3">
-              <div className="rounded-[1.15rem] border border-border/70 px-4 py-4">
+              <div className="rounded-2xl border border-border/70 px-4 py-4">
                 <p className="text-sm font-medium text-foreground">1. Company goal</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">Define the major outcome the company wants to move toward.</p>
               </div>
-              <div className="rounded-[1.15rem] border border-border/70 px-4 py-4">
+              <div className="rounded-2xl border border-border/70 px-4 py-4">
                 <p className="text-sm font-medium text-foreground">2. Team or agent goals</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">Break that into accountable streams owned by teams or individual operators.</p>
               </div>
-              <div className="rounded-[1.15rem] border border-border/70 px-4 py-4">
+              <div className="rounded-2xl border border-border/70 px-4 py-4">
                 <p className="text-sm font-medium text-foreground">3. Task goals</p>
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">Translate each stream into concrete targets that can turn into issues and execution.</p>
               </div>
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-border/70 bg-background p-5">
+          <div className="rounded-4xl border border-border/70 bg-background p-5">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Why it helps
             </p>
             <div className="mt-4 space-y-3">
-              <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/70 px-4 py-4">
+              <div className="flex items-start gap-3 rounded-2xl border border-border/70 px-4 py-4">
                 <Zap className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Sharper prioritization</p>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">Teams can tell whether work serves strategy or is just noise.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/70 px-4 py-4">
+              <div className="flex items-start gap-3 rounded-2xl border border-border/70 px-4 py-4">
                 <Users className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Cleaner ownership</p>
                   <p className="mt-1 text-sm leading-6 text-muted-foreground">Agent and team goals make responsibility explicit instead of implied.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 rounded-[1.15rem] border border-border/70 px-4 py-4">
+              <div className="flex items-start gap-3 rounded-2xl border border-border/70 px-4 py-4">
                 <ArrowRight className="mt-0.5 h-4 w-4 text-muted-foreground" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Better execution flow</p>

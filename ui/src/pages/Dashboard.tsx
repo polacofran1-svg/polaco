@@ -211,7 +211,7 @@ export function Dashboard() {
     <div className="space-y-6">
       {error && <p className="text-sm text-destructive">{error.message}</p>}
 
-      <section className="saturn-surface rounded-[2rem] p-6">
+      <section className="saturn-surface rounded-5xl p-6">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -226,17 +226,17 @@ export function Dashboard() {
           </div>
 
           <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Live</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{liveAgentCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Agents running now</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Open Work</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{openIssueCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Issues still moving</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Review</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{pendingReviewCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Items awaiting action</p>
@@ -255,7 +255,7 @@ export function Dashboard() {
       />
 
       {hasNoAgents && (
-        <div className="flex items-center justify-between gap-3 rounded-[1.5rem] border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
+        <div className="flex items-center justify-between gap-3 rounded-3xl border border-amber-300 bg-amber-50 px-4 py-3 dark:border-amber-500/25 dark:bg-amber-950/60">
           <div className="flex items-center gap-2.5">
             <Bot className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
             <p className="text-sm text-amber-900 dark:text-amber-100">
@@ -276,7 +276,7 @@ export function Dashboard() {
       {data && (
         <>
           {data.budgets.activeIncidents > 0 ? (
-            <div className="flex items-start justify-between gap-3 rounded-[1.5rem] border border-destructive/20 bg-destructive/5 px-4 py-3">
+            <div className="flex items-start justify-between gap-3 rounded-3xl border border-destructive/20 bg-destructive/5 px-4 py-3">
               <div className="flex items-start gap-2.5">
                 <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                 <div>
@@ -364,12 +364,12 @@ export function Dashboard() {
             slotTypes={["dashboardWidget"]}
             context={{ companyId: selectedCompanyId }}
             className="grid gap-4 md:grid-cols-2"
-            itemClassName="rounded-[1.5rem] border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
+            itemClassName="rounded-3xl border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]"
           />
 
           <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
             {recentActivity.length > 0 && (
-              <div className="min-w-0 rounded-[1.75rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+              <div className="min-w-0 rounded-4xl border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
                 <div className="mb-3">
                   <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     Recent Activity
@@ -378,7 +378,7 @@ export function Dashboard() {
                     Fresh movement from people, agents, and workflow events.
                   </p>
                 </div>
-                <div className="overflow-hidden rounded-[1.25rem] border border-border divide-y divide-border bg-background">
+                <div className="overflow-hidden rounded-2xl border border-border divide-y divide-border bg-background">
                   {recentActivity.map((event) => (
                     <ActivityRow
                       key={event.id}
@@ -394,7 +394,7 @@ export function Dashboard() {
               </div>
             )}
 
-            <div className="min-w-0 rounded-[1.75rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
+            <div className="min-w-0 rounded-4xl border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
               <div className="mb-3">
                 <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                   Recent Tasks
@@ -404,11 +404,11 @@ export function Dashboard() {
                 </p>
               </div>
               {recentIssues.length === 0 ? (
-                <div className="rounded-[1.25rem] border border-border bg-background p-4">
+                <div className="rounded-2xl border border-border bg-background p-4">
                   <p className="text-sm text-muted-foreground">No tasks yet.</p>
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-[1.25rem] border border-border divide-y divide-border bg-background">
+                <div className="overflow-hidden rounded-2xl border border-border divide-y divide-border bg-background">
                   {recentIssues.slice(0, 10).map((issue) => (
                     <Link
                       key={issue.id}

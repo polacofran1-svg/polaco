@@ -40,6 +40,10 @@
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 1.75rem;
+  --radius-5xl: 2rem;
 }
 
 :root {
@@ -57,15 +61,15 @@
   --secondary-foreground: oklch(0.2 0 0);
   --muted: oklch(0.96 0 0);
   --muted-foreground: oklch(0.44 0 0);
-  --accent: oklch(0.84 0.22 130);
-  --accent-foreground: oklch(0.14 0.04 130);
+  --accent: oklch(0.90 0.05 264);
+  --accent-foreground: oklch(0.22 0.12 264);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.88 0 0);
   --input: oklch(0.88 0 0);
-  --ring: oklch(0.84 0.22 130);
+  --ring: oklch(0.58 0.20 264);
   --chart-1: oklch(0.13 0 0);
-  --chart-2: oklch(0.84 0.22 130);
+  --chart-2: oklch(0.58 0.20 264);
   --chart-3: oklch(0.38 0 0);
   --chart-4: oklch(0.65 0 0);
   --chart-5: oklch(0.52 0 0);
@@ -76,7 +80,7 @@
   --sidebar-accent: oklch(0.92 0 0);
   --sidebar-accent-foreground: oklch(0.13 0 0);
   --sidebar-border: oklch(0.88 0 0);
-  --sidebar-ring: oklch(0.84 0.22 130);
+  --sidebar-ring: oklch(0.58 0.20 264);
 }
 
 .dark {
@@ -86,32 +90,32 @@
   --card-foreground: oklch(0.96 0 0);
   --popover: oklch(0.13 0 0);
   --popover-foreground: oklch(0.96 0 0);
-  --primary: oklch(0.84 0.22 130);
-  --primary-foreground: oklch(0.12 0.04 130);
+  --primary: oklch(0.67 0.18 264);
+  --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.18 0 0);
   --secondary-foreground: oklch(0.96 0 0);
   --muted: oklch(0.17 0 0);
   --muted-foreground: oklch(0.62 0 0);
-  --accent: oklch(0.84 0.22 130);
-  --accent-foreground: oklch(0.12 0.04 130);
+  --accent: oklch(0.67 0.18 264);
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.637 0.237 25.331);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.22 0 0);
   --input: oklch(0.22 0 0);
-  --ring: oklch(0.84 0.22 130);
+  --ring: oklch(0.67 0.18 264);
   --chart-1: oklch(0.96 0 0);
-  --chart-2: oklch(0.84 0.22 130);
+  --chart-2: oklch(0.67 0.18 264);
   --chart-3: oklch(0.58 0 0);
   --chart-4: oklch(0.38 0 0);
   --chart-5: oklch(0.74 0 0);
   --sidebar: oklch(0.11 0 0);
   --sidebar-foreground: oklch(0.96 0 0);
-  --sidebar-primary: oklch(0.84 0.22 130);
-  --sidebar-primary-foreground: oklch(0.12 0.04 130);
+  --sidebar-primary: oklch(0.67 0.18 264);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
   --sidebar-accent: oklch(0.16 0 0);
   --sidebar-accent-foreground: oklch(0.96 0 0);
   --sidebar-border: oklch(0.2 0 0);
-  --sidebar-ring: oklch(0.84 0.22 130);
+  --sidebar-ring: oklch(0.67 0.18 264);
 }
 
 @layer base {
@@ -808,6 +812,10 @@ a.paperclip-mention-chip[data-mention-kind="agent"]::before {
   --tw-prose-pre-code: #cdd6f4;
   --tw-prose-invert-pre-bg: #1e1e2e;
   --tw-prose-invert-pre-code: #cdd6f4;
+  /* Override Tailwind Typography defaults so links and checkboxes use the
+     design-system accent (purple/indigo, hue 264) instead of default green. */
+  --tw-prose-links: color-mix(in oklab, var(--foreground) 76%, #0969da 24%);
+  --tw-prose-invert-links: color-mix(in oklab, var(--foreground) 80%, #58a6ff 20%);
 }
 
 .paperclip-markdown pre {
@@ -934,6 +942,14 @@ a.paperclip-mention-chip[data-mention-kind="agent"]::before {
   text-decoration: underline;
   text-underline-offset: 0.15em;
   cursor: pointer;
+}
+
+.paperclip-markdown a:hover {
+  opacity: 0.7;
+}
+
+.paperclip-markdown input[type="checkbox"] {
+  accent-color: oklch(0.58 0.20 264);
 }
 
 .paperclip-markdown a.paperclip-mention-chip {

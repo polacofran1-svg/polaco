@@ -813,7 +813,7 @@ export function IssueDocumentsSection({
               key={doc.id}
               id={`document-${doc.key}`}
               className={cn(
-                "rounded-[1.5rem] border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[background-color,border-color,box-shadow] duration-300",
+                "rounded-3xl border border-border bg-card p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)] transition-[background-color,border-color,box-shadow] duration-300",
                 highlightDocumentKey === doc.key && "border-primary/50 bg-primary/5",
               )}
             >

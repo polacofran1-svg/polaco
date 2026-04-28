@@ -126,7 +126,7 @@ export function IssueFiltersPopover({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-[min(780px,calc(100vw-2rem))] max-h-[min(80vh,42rem)] overflow-y-auto overscroll-contain rounded-[1.5rem] p-0"
+        className="w-[min(780px,calc(100vw-2rem))] max-h-[min(80vh,42rem)] overflow-y-auto overscroll-contain rounded-3xl p-0"
       >
         <div className="space-y-4 p-4">
           <div className="flex items-center justify-between">

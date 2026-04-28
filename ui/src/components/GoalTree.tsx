@@ -70,7 +70,7 @@ function GoalNode({ goal, children, allGoals, depth, goalLink, onSelect }: GoalN
   );
 
   const classes = cn(
-    "group flex items-start gap-3 rounded-[1.15rem] border border-border/70 bg-background px-4 py-4 text-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-accent/10 hover:shadow-[0_12px_32px_rgba(15,23,42,0.06)]",
+    "group flex items-start gap-3 rounded-2xl border border-border/70 bg-background px-4 py-4 text-sm transition-all hover:-translate-y-0.5 hover:border-border hover:bg-accent/10 hover:shadow-[0_12px_32px_rgba(15,23,42,0.06)]",
   );
 
   return (

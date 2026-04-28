@@ -602,7 +602,7 @@ export function Routines() {
 
   return (
     <div className="space-y-6">
-      <section className="saturn-surface rounded-[2rem] p-6">
+      <section className="saturn-surface rounded-5xl p-6">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
@@ -617,17 +617,17 @@ export function Routines() {
           </div>
 
           <div className="grid grid-cols-3 gap-3 sm:min-w-[420px]">
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Active</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{activeRoutineCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Running schedules</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Drafts</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{draftRoutineCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Need a default owner</p>
             </div>
-            <div className="rounded-[1.5rem] border border-border bg-background px-4 py-4">
+            <div className="rounded-3xl border border-border bg-background px-4 py-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Archived</p>
               <p className="mt-2 text-2xl font-semibold tracking-[-0.03em]">{archivedRoutineCount}</p>
               <p className="mt-1 text-xs text-muted-foreground">Inactive automations</p>
@@ -653,7 +653,7 @@ export function Routines() {
               key={template.id}
               type="button"
               onClick={() => openComposerWithTemplate(template)}
-              className="rounded-[1.5rem] border border-border/70 bg-background px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[0_14px_40px_rgba(15,23,42,0.08)]"
+              className="rounded-3xl border border-border/70 bg-background px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[0_14px_40px_rgba(15,23,42,0.08)]"
             >
               <div className="flex items-center justify-between gap-3">
                 <span className="text-base font-semibold tracking-[-0.02em] text-foreground">{template.label}</span>
@@ -687,7 +687,7 @@ export function Routines() {
                 key={template.id}
                 type="button"
                 onClick={() => openComposerWithTemplate(template)}
-                className="rounded-[1.35rem] border border-border/70 bg-background px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[0_14px_40px_rgba(15,23,42,0.08)]"
+                className="rounded-2xl border border-border/70 bg-background px-5 py-5 text-left transition-all hover:-translate-y-0.5 hover:border-border hover:shadow-[0_14px_40px_rgba(15,23,42,0.08)]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-base font-semibold tracking-[-0.02em] text-foreground">{template.label}</span>
@@ -819,15 +819,15 @@ export function Routines() {
           <div className="saturn-modal-body">
             <div className="saturn-modal-section bg-muted/10">
               <div className="saturn-modal-inner grid gap-3 md:grid-cols-3">
-                <div className="rounded-[1.3rem] border border-border/70 bg-background px-4 py-4">
+                <div className="rounded-2xl border border-border/70 bg-background px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Definition</p>
                   <p className="mt-2 text-sm text-foreground">Name the loop and describe the recurring job.</p>
                 </div>
-                <div className="rounded-[1.3rem] border border-border/70 bg-background px-4 py-4">
+                <div className="rounded-2xl border border-border/70 bg-background px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Ownership</p>
                   <p className="mt-2 text-sm text-foreground">Assign the default agent and project when you know them.</p>
                 </div>
-                <div className="rounded-[1.3rem] border border-border/70 bg-background px-4 py-4">
+                <div className="rounded-2xl border border-border/70 bg-background px-4 py-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">Delivery</p>
                   <p className="mt-2 text-sm text-foreground">Tune concurrency and catch-up policy only if the workflow needs it.</p>
                 </div>
@@ -861,7 +861,7 @@ export function Routines() {
                     key={template.id}
                     type="button"
                     onClick={() => openComposerWithTemplate(template)}
-                    className={`flex min-h-[168px] flex-col rounded-[1.2rem] border px-4 py-4 text-left transition-all ${
+                    className={`flex min-h-[168px] flex-col rounded-2xl border px-4 py-4 text-left transition-all ${
                       selectedTemplateId === template.id
                         ? "border-foreground/20 bg-background shadow-[0_10px_30px_rgba(15,23,42,0.08)]"
                         : "border-border/70 bg-background/70 hover:border-border hover:bg-background"
@@ -927,7 +927,7 @@ export function Routines() {
 
             <div className="px-5 pb-3">
               <div className="overflow-x-auto overscroll-x-contain">
-                <div className="inline-flex min-w-full flex-wrap items-center gap-2 text-sm text-muted-foreground sm:min-w-max sm:flex-nowrap rounded-[1.2rem] border border-border/70 bg-muted/10 px-3 py-3">
+                <div className="inline-flex min-w-full flex-wrap items-center gap-2 text-sm text-muted-foreground sm:min-w-max sm:flex-nowrap rounded-2xl border border-border/70 bg-muted/10 px-3 py-3">
                   <span>For</span>
                   <InlineEntitySelector
                     ref={assigneeSelectorRef}
